@@ -31,6 +31,8 @@ jobs:
       - name: 스캔 실행
         run: python scanner/scan_us.py
         env:
+          # 보유 종목도 함께 계산한다. 스캐너는 여기서 티커만 읽고 수량·평단은 읽지 않는다.
+          POSITIONS_JSON: ${{ secrets.POSITIONS_JSON }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 

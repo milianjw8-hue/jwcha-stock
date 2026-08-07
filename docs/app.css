@@ -191,6 +191,16 @@ button.danger{background:transparent;border:1px solid var(--bad);color:var(--bad
 .alertbox b{color:var(--bad)}
 .okbox{background:rgba(46,212,122,.1);border:1px solid rgba(46,212,122,.3);
   border-radius:9px;padding:9px 11px;margin-top:9px;font-size:12.5px;color:#B8F0D2}
+/* 보유 종목이 지금도 매수 규칙을 통과하는지 — 통과하지 못하면 매도 근거가 된다 */
+.hold-rule{border-radius:9px;padding:8px 11px;margin-top:9px;font-size:12.5px;
+  border:1px solid var(--line);background:var(--panel2);color:var(--dim)}
+.hold-rule b{color:var(--text);font-weight:600;margin-right:5px}
+.hold-rule.ok{border-color:rgba(46,212,122,.35);color:#B8F0D2}
+.hold-rule.warn{border-color:rgba(255,183,77,.4);color:#FFDDA6}
+.hold-rule.bad{border-color:rgba(255,91,110,.4);color:#FFC3CB}
+.hold-none{margin-top:9px;font-size:11.5px;color:var(--dim);line-height:1.5}
+.pos .met{margin-top:9px}
+
 .tranche{display:flex;align-items:center;gap:9px;padding:8px 0;font-size:12.5px;
   border-bottom:1px solid rgba(38,80,95,.45)}
 .tranche:last-child{border-bottom:none}

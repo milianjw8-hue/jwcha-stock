@@ -41,6 +41,9 @@
 - **차트** — 외부 라이브러리 없이 canvas 로 렌더. 핀치 줌·팬 지원.
 - **포지션 관리** — 손절가 없이는 등록 불가. 피라미딩(직전 차수 손실 시 추가매수 잠금),
   트레일링 스탑(한 번 올린 손절선은 내리지 않음), 장중 경보.
+- **보유 종목 추적** — 스캔을 통과하지 못한 보유 종목도 같은 지표·차트·룰셋 점수를
+  받는다. 카드의 "지금 다시 본다면"이 매수 규칙 재평가 결과이며, 무너지면 매도 근거가
+  된다. 대상 티커는 `POSITIONS_JSON` 에서 읽는다 (§보안).
 - **백테스트** — `docs/rules/` 를 그대로 읽어 기대값을 실측한다. 자세한 내용은
   [`backtest/RUNBOOK.md`](backtest/RUNBOOK.md).
 
@@ -52,7 +55,7 @@
 |---|---|---|
 | `KRX_ID` / `KRX_PW` | 국장 데이터 (data.krx.co.kr 계정) | 국장 사용 시 |
 | `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID` | 알림 | 선택 |
-| `POSITIONS_JSON` | 장중 포지션 감시 | 선택 |
+| `POSITIONS_JSON` | 장중 포지션 감시 + 보유 종목 지표 계산 | 선택 |
 
 등록 방법은 [`scanner/README.md`](scanner/README.md).
 
@@ -62,3 +65,7 @@
   비밀은 Actions Secrets 에만 둔다.
 - 보유 포지션은 저장소에 커밋하지 않는다. 기기의 IndexedDB 에만 있고, 장중 감시가
   필요하면 앱이 만들어주는 JSON 을 `POSITIONS_JSON` 시크릿에 넣는다.
+- 스캐너는 `POSITIONS_JSON` 에서 **시장과 티커만** 읽는다 (`scanner/holdings.py`).
+  수량·평단가·손절가는 읽지 않으며 `docs/` 로 나가지 않는다. 다만 결과 파일에
+  **종목명과 시세는 실린다** — 공개 저장소라면 무엇을 보유 중인지는 드러난다.
+  이를 원치 않으면 `POSITIONS_JSON` 을 비우고 텔레그램 경보만 쓴다.

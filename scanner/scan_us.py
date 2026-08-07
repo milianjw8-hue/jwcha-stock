@@ -8,6 +8,9 @@ docs/results_us.json 으로 저장한다. docs/index.html 의 자동 스캔 결�
   "market_ok": true,
   "candidates": [
     {"ticker","setup","rs_pctile","dist_to_pivot_pct","pct_of_52wk_high", ...}
+  ],
+  "holdings": [                      // 스캔을 통과하지 못한 보유 종목 (POSITIONS_JSON)
+    {"ticker","name","close","hold":true,"metrics","rule"}
   ]
 }
 setup: breakout(🔥 돌파) | pivot_near(🎯 피봇 근접) | base(🧱 베이스) | extended(↗ 이탈)
@@ -25,6 +28,7 @@ import yfinance as yf
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from telegram_push import send_telegram
 from enrich import enrich, summarize
+import holdings as H
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT_PATH = os.path.join(ROOT, "docs", "results_us.json")
@@ -143,9 +147,24 @@ def scan(market_ok: bool) -> dict:
         })
         frames[t] = df
 
+    # 보유 종목은 트렌드 템플릿을 통과하지 못해도 앱이 계속 추적해야 한다.
+    # frames 에는 템플릿 탈락 종목이 없으므로 유니버스 다운로드 원본에서 다시 찾는다.
+    # (유니버스 밖 종목은 H.fetch_us 가 따로 내려받는다)
+    held_tickers = H.held_tickers("us")
+    held_have = {}
+    for t in held_tickers:
+        try:
+            d = data[t].dropna()
+        except (KeyError, AttributeError):
+            continue
+        if not d.empty:
+            held_have[t] = d
+
     df = pd.DataFrame(rows)
     if df.empty:
-        return {"candidates": []}
+        held, held_frames = H.fetch_us(held_tickers, set(), held_have)
+        enrich(held, held_frames, "us", market_ok)
+        return {"candidates": [], "holdings": held}
     df["rs_pctile"] = df["wret"].rank(pct=True) * 100
     df = df[df["rs_pctile"] >= MIN_RS_PCTILE]
     order = {"breakout": 0, "pivot_near": 1, "base": 2, "extended": 3}
@@ -167,8 +186,15 @@ def scan(market_ok: bool) -> dict:
         # RS 는 유니버스 상대 순위라 개별 종목 데이터만으로는 계산할 수 없다.
         extra[t] = {"rs_pctile": round(float(r["rs_pctile"]))}
 
-    enrich(cands, frames, "us", market_ok, extra)
-    return {"candidates": cands}
+    held, held_frames = H.fetch_us(held_tickers,
+                                   {c["ticker"] for c in cands}, held_have)
+    frames.update(held_frames)
+    print(f"보유 종목 {len(held)}개 추가 계산")
+
+    # 같은 리스트 객체를 수정하므로 enrich 후에도 cands 와 held 는 그대로 갈라져 있다
+    enrich(cands + held, frames, "us", market_ok, extra)
+    # 지표 계산에 실패한 보유 종목은 차트 파일도 없다 — 앱에 빈 카드를 남기지 않는다
+    return {"candidates": cands, "holdings": [c for c in held if "metrics" in c]}
 
 
 def main():
@@ -193,6 +219,10 @@ def main():
             lines.append(f"    └ {badge}")
     if not result["candidates"]:
         lines.append("후보 없음")
+    warn = H.summarize(result.get("holdings") or [])
+    if warn:
+        lines.append("\n<b>보유 종목 점검</b>")
+        lines.extend(warn)
     send_telegram("\n".join(lines))
 
 

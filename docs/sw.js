@@ -1,5 +1,6 @@
 /* 스윙콘솔 서비스워커 — 앱 껍데기는 캐시, 스캔 결과는 네트워크 우선 */
-const CACHE = "jwcha-stock-v3";
+// 껍데기는 캐시 우선이라, app.js/app.css/guide.html 을 고치면 반드시 올려야 한다
+const CACHE = "jwcha-stock-v4";
 const SHELL = ["./", "./index.html", "./guide.html", "./app.css", "./app.js",
   "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"];
 

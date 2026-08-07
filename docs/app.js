@@ -140,11 +140,15 @@ function loadAll() {
   });
 }
 function candidates(mkt) { var s = S.scan[mkt]; return (s && s.candidates) || []; }
-function findCand(mkt, t) {
-  var list = candidates(mkt);
+// 보유 종목 — 스캔을 통과하지 못해도 스캐너가 지표를 실어준다 (예전 결과 파일엔 없다)
+function holdings(mkt) { var s = S.scan[mkt]; return (s && s.holdings) || []; }
+function pick(list, t) {
   for (var i = 0; i < list.length; i++) if (list[i].ticker === t) return list[i];
   return null;
 }
+function findCand(mkt, t) { return pick(candidates(mkt), t); }
+// 오늘 후보이면서 동시에 보유일 수 있다. 그때는 수급 지표까지 채워진 후보 쪽이 낫다.
+function findData(mkt, t) { return findCand(mkt, t) || pick(holdings(mkt), t); }
 function nameOf(c) { return c.name || c.ticker; }
 function loadOhlc(mkt, t) {
   var sl = slug(mkt, t);
@@ -439,7 +443,7 @@ function openChart(mkt, ticker) {
   $("chart-pick").value = ticker;
   go("chart");
   loadOhlc(mkt, ticker).then(function (d) {
-    var c = findCand(mkt, ticker);
+    var c = findData(mkt, ticker);
     CH.data = d; CH.missing = !d; CH.metrics = c ? c.metrics : null;
     CH.mkt = mkt; CH.off = 0; CH.cursor = -1;
     if (!d) $("chart-info").innerHTML = "";
@@ -479,16 +483,18 @@ function avgOf(p) {
   return { qty: q, avg: q ? s / q : 0, cost: s };
 }
 function quoteOf(p) {
-  if (p.cur) return p.cur;
-  var c = findCand(p.mkt, p.tick);
+  // 손으로 넣은 현재가는 그날 안에서만 믿는다. 어제 값이 오늘 종가를 이기면 안 된다.
+  if (p.cur && p.curAt === today()) return p.cur;
+  var c = findData(p.mkt, p.tick);
   if (c && c.close) return c.close;
+  if (p.cur) return p.cur;
   var d = S.ohlc[slug(p.mkt, p.tick)];
   return d ? d.c[d.c.length - 1] : null;
 }
-function metricsOf(p) { var c = findCand(p.mkt, p.tick); return c ? c.metrics : null; }
 
 function evalPosition(p) {
-  var a = avgOf(p), cur = quoteOf(p), m = metricsOf(p);
+  var a = avgOf(p), cur = quoteOf(p), src = findData(p.mkt, p.tick);
+  var m = src ? src.metrics : null;
   var risk0 = p.entry0 - p.stop0;
   var r = (cur != null && risk0 > 0) ? (cur - a.avg) / risk0 : null;
   var pct = (cur != null && a.avg) ? (cur / a.avg - 1) * 100 : null;
@@ -514,7 +520,9 @@ function evalPosition(p) {
   var t1 = r1 && r1.first_target ? p.entry0 + risk0 * (r1.first_target.r || 2) : null;
   if (r != null && t1 && cur >= t1 && !p.tookProfit) alerts.push("1차 익절 구간(" + (r1.first_target.r) + "R) 도달 — 절반 정리 후 손절 본전 이동");
 
-  return { avg: a.avg, qty: a.qty, cost: a.cost, cur: cur, r: r, pct: pct, stop: stop, trail: trail, high: high, alerts: alerts, target1: t1, metrics: m };
+  return { avg: a.avg, qty: a.qty, cost: a.cost, cur: cur, r: r, pct: pct, stop: stop,
+           trail: trail, high: high, alerts: alerts, target1: t1, metrics: m,
+           rule: src ? src.rule : null };
 }
 function riskRules(mkt) { return S.rules.exit && S.rules.exit.markets ? S.rules.exit.markets[mkt] : null; }
 
@@ -543,6 +551,20 @@ function renderPositions() {
       "<span>1차 익절</span><span>" + (v.target1 == null ? "—" : nf(v.target1, 2)) + "</span>" +
       "</div>";
 
+    // 살 때의 근거가 아직 유효한지. 점수가 무너졌으면 경보가 없어도 팔 이유가 된다.
+    if (v.rule) {
+      var vd = v.rule.verdict;
+      card.appendChild(el("div", "hold-rule " + (vd === "진입 가능" ? "ok" : vd === "관망" ? "warn" : "bad"),
+        "<b>지금 다시 본다면</b> " + esc(vd) + " · 규칙 " + v.rule.pct + "%"));
+    }
+    if (v.metrics) {
+      card.appendChild(el("div", "met", chipsHTML(badges(v.metrics, true))));
+    } else {
+      // 스캐너가 이 종목을 모른다 — POSITIONS_JSON 을 갱신하면 다음 스캔부터 채워진다
+      card.appendChild(el("div", "hold-none",
+        "지표 없음 — 아래 <b>감시용 JSON 복사</b> 후 POSITIONS_JSON 시크릿에 넣으면 다음 스캔부터 채워진다"));
+    }
+
     v.alerts.forEach(function (a) { card.appendChild(el("div", "alertbox", "<b>⚠</b> " + esc(a))); });
 
     // 피라미딩 다음 차수
@@ -561,7 +583,8 @@ function renderPositions() {
     bCur.addEventListener("click", function () {
       var x = prompt(p.tick + " 현재가", v.cur == null ? "" : String(v.cur));
       if (x == null) return;
-      p.cur = parseFloat(x) || null; p.high = Math.max(p.high || 0, p.cur || 0);
+      p.cur = parseFloat(x) || null; p.curAt = today();
+      p.high = Math.max(p.high || 0, p.cur || 0);
       save("positions"); renderPositions(); renderTodo();
     });
     var bAdd = el("button", "act ghost", "추가 매수");
@@ -671,7 +694,7 @@ function renderRules() {
   box.innerHTML = "";
   if (!rs) { box.appendChild(el("p", "empty", "룰셋 로드 실패")); return; }
   var t = S.sel.check;
-  var c = t ? findCand(S.market, t) : null;
+  var c = t ? findData(S.market, t) : null;
   var metrics = c ? c.metrics : null;
   var mk = key(S.market, t || "-");
   var man = S.manual[mk] || (S.manual[mk] = {});
@@ -720,7 +743,7 @@ function renderRules() {
 function paintScore() {
   var rs = S.rules[S.market];
   if (!rs) return;
-  var t = S.sel.check, c = t ? findCand(S.market, t) : null;
+  var t = S.sel.check, c = t ? findData(S.market, t) : null;
   var man = S.manual[key(S.market, t || "-")] || {};
   var r = scoreRuleset(rs, c ? c.metrics : null, man);
   $("rule-score").textContent = r.pct;
@@ -893,12 +916,23 @@ function fillPickers() {
   [["chart-pick", "chart"], ["check-pick", "check"]].forEach(function (pair) {
     var sel = $(pair[0]), cur = S.sel[pair[1]];
     sel.innerHTML = '<option value="">' + (pair[1] === "chart" ? "후보를 선택하세요" : "종목 선택 — 자동 판정 항목이 채워진다") + "</option>";
-    candidates(S.market).forEach(function (c) {
-      var o = document.createElement("option");
-      o.value = c.ticker; o.textContent = nameOf(c);
-      sel.appendChild(o);
-    });
-    if (cur && findCand(S.market, cur)) sel.value = cur; else S.sel[pair[1]] = "";
+    function group(label, list, prefix) {
+      if (!list.length) return;
+      var g = document.createElement("optgroup");
+      g.label = label;
+      list.forEach(function (c) {
+        var o = document.createElement("option");
+        o.value = c.ticker; o.textContent = prefix + nameOf(c);
+        g.appendChild(o);
+      });
+      sel.appendChild(g);
+    }
+    group("오늘의 후보", candidates(S.market), "");
+    // 보유 종목이 오늘 후보에도 들었다면 후보 쪽에만 둔다 — 같은 값이 두 번 뜨면 헷갈린다
+    group("보유 종목", holdings(S.market).filter(function (c) {
+      return !findCand(S.market, c.ticker);
+    }), "◆ ");
+    if (cur && findData(S.market, cur)) sel.value = cur; else S.sel[pair[1]] = "";
   });
 }
 

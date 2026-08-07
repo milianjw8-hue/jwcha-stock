@@ -8,6 +8,9 @@ docs/results.json 으로 저장한다. docs/index.html 의 자동 스캔 결과
   "market_ok": true,
   "candidates": [
     {"name","breakout","vol_vs_20d","pct_of_52wk_high", ...}
+  ],
+  "holdings": [                      // 스캔을 통과하지 못한 보유 종목 (POSITIONS_JSON)
+    {"ticker","name","close","hold":true,"metrics","rule"}
   ]
 }
 """
@@ -23,6 +26,7 @@ from pykrx import stock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from telegram_push import send_telegram
 from enrich import enrich, summarize
+import holdings as H
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT_PATH = os.path.join(ROOT, "docs", "results.json")
@@ -165,7 +169,7 @@ def scan(date: str) -> list[dict]:
         frames[ticker] = df
 
     candidates.sort(key=lambda r: (not r["breakout"], -r["vol_vs_20d"]))
-    return candidates[:MAX_CANDIDATES], frames
+    return candidates[:MAX_CANDIDATES], frames, set(top.index)
 
 
 def main():
@@ -174,23 +178,34 @@ def main():
     date = latest_trading_day()
     print(f"기준일: {date}")
     market_ok = market_filter(date)
-    cands, frames = scan(date)
+    cands, frames, top_today = scan(date)
 
-    # 룰셋이 요구하는 수급 지표는 후보에 대해서만 조회한다 (KRX 호출 절약)
+    # 보유 종목은 스캔을 통과하지 못해도 앱이 현재가·패턴 경보를 띄울 수 있어야 한다.
+    held, held_frames = H.fetch_kr(H.held_tickers("kr"), date,
+                                   skip={c["ticker"] for c in cands})
+    frames.update(held_frames)
+    print(f"보유 종목 {len(held)}개 추가 계산")
+
+    # 룰셋이 요구하는 수급 지표는 후보·보유에 대해서만 조회한다 (KRX 호출 절약)
     prior = top_value_history(date, days=2)
     extra = {}
-    for c in cands:
+    for c in cands + held:
         t = c["ticker"]
         extra[t] = {
-            "top_value_days": 1 + prior.get(t, 0),   # 당일 포함
+            # 오늘 상위권에 없는 보유 종목까지 1을 더하면 실적이 부풀려진다
+            "top_value_days": (1 if t in top_today else 0) + prior.get(t, 0),
             "inst_foreign_buy_streak": buy_streak(t, date),
         }
-    enrich(cands, frames, "kr", market_ok, extra)
+    # 같은 리스트 객체를 수정하므로 enrich 후에도 cands 와 held 는 그대로 갈라져 있다
+    enrich(cands + held, frames, "kr", market_ok, extra)
+    # 지표 계산에 실패한 보유 종목은 차트 파일도 없다 — 앱에 빈 카드를 남기지 않는다
+    held = [c for c in held if "metrics" in c]
 
     result = {
         "asof": now_kst.strftime("%Y-%m-%d %H:%M KST"),
         "market_ok": market_ok,
         "candidates": cands,
+        "holdings": held,
     }
 
     os.makedirs(os.path.dirname(OUT_PATH), exist_ok=True)
@@ -208,6 +223,10 @@ def main():
             lines.append(f"    └ {badge}")
     if not result["candidates"]:
         lines.append("후보 없음")
+    warn = H.summarize(held)
+    if warn:
+        lines.append("\n<b>보유 종목 점검</b>")
+        lines.extend(warn)
     send_telegram("\n".join(lines))
 
 
