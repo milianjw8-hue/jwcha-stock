@@ -42,6 +42,13 @@ h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px;
 }
 .seg button.on{background:var(--accent);color:var(--ink);font-weight:700}
 .asof{font-size:11px;color:var(--dim);margin:6px 0 0}
+.help{
+  flex:none;width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--panel2);color:var(--dim);border:1px solid var(--line);
+  font-size:14px;font-weight:700;text-decoration:none;
+}
+.help:active{background:var(--accent);color:var(--ink)}
 
 /* ── 하단 탭바 (엄지 도달 영역) ─────────────────────── */
 nav.tabbar{

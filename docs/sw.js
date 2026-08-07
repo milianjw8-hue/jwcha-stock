@@ -1,6 +1,6 @@
 /* 스윙콘솔 서비스워커 — 앱 껍데기는 캐시, 스캔 결과는 네트워크 우선 */
-const CACHE = "jwcha-stock-v2";
-const SHELL = ["./", "./index.html", "./app.css", "./app.js",
+const CACHE = "jwcha-stock-v3";
+const SHELL = ["./", "./index.html", "./guide.html", "./app.css", "./app.js",
   "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", e => {
