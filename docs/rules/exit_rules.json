@@ -1,0 +1,119 @@
+{
+  "id": "exit_rules",
+  "label": "매도 규칙 — 진입 전 확정",
+  "markets": {
+    "us": {
+      "label": "미국장",
+      "stop": {
+        "max_pct": 8,
+        "recommended_pct": [3, 5],
+        "alt": "직전 수축 저점 아래",
+        "text": "최대 진입가 -7~8%. 실전 권장은 -3~5%, 또는 직전 수축 저점 아래."
+      },
+      "first_target": {
+        "r": 2,
+        "r_max": 3,
+        "sell_fraction": [0.33, 0.5],
+        "move_stop_to_breakeven": true,
+        "text": "+2R~3R 도달 시 1/3~1/2 매도, 나머지 손절선을 본전으로 이동."
+      },
+      "trail": {
+        "default_mode": "ma20",
+        "modes": ["ma10", "ma20", "atr", "pct"],
+        "atr_mult": 2.5,
+        "pct": 15,
+        "text": "잔여 물량은 10일선(강한 추세) 또는 20일선 종가 이탈 시 정리."
+      },
+      "hard_exits": [
+        {
+          "id": "failed_breakout",
+          "t": "실패 돌파",
+          "rule": "돌파 후 3일 내 피봇 아래 종가 마감",
+          "days": 3,
+          "text": "돌파 후 3일 내 피봇 아래 종가 마감 = 실패 돌파. 즉시 청산."
+        },
+        {
+          "id": "distribution",
+          "t": "분산 경보",
+          "metric": "distribution_alert",
+          "text": "고점권 대량거래 + 긴 위꼬리 + 변동성 급증 = 물량 손바뀜. 분할 익절."
+        },
+        {
+          "id": "topping_pattern",
+          "t": "천정 패턴",
+          "metric_any": ["head_shoulders", "double_top", "evening_star"],
+          "text": "헤드앤숄더 넥라인 이탈 · 쌍봉 · 이브닝스타 = 추세 전환 경보."
+        }
+      ]
+    },
+    "kr": {
+      "label": "국내장",
+      "stop": {
+        "max_pct": 7,
+        "recommended_pct": [5, 7],
+        "alt": "돌파 캔들 저가 이탈",
+        "text": "-5~7%, 또는 돌파 캔들 저가 이탈. 변동성이 크므로 미국장보다 타이트하게."
+      },
+      "first_target": {
+        "r": 2,
+        "pct": [10, 15],
+        "sell_fraction": [0.5],
+        "move_stop_to_breakeven": true,
+        "text": "+10~15% 또는 2R에서 절반. 급등 3일차 장대음봉·거래량 폭증은 분할 익절 신호."
+      },
+      "trail": {
+        "default_mode": "ma20",
+        "modes": ["ma5", "ma20", "atr", "pct"],
+        "atr_mult": 2.0,
+        "pct": 12,
+        "text": "20일선 종가 이탈 시 정리. 급등 국면에서는 5일선으로 타이트하게."
+      },
+      "hard_exits": [
+        {
+          "id": "theme_leader_break",
+          "t": "테마 청산",
+          "rule": "manual",
+          "text": "테마 대장주가 먼저 꺾이면 보유 종목이 아직 버텨도 전량 정리. 순환매 이탈은 되돌리지 않는다."
+        },
+        {
+          "id": "event",
+          "t": "이벤트",
+          "rule": "manual",
+          "text": "유상증자·CB 전환 공시, 투자경고 지정 = 규칙 무관 즉시 청산."
+        },
+        {
+          "id": "distribution",
+          "t": "분산 경보",
+          "metric": "distribution_alert",
+          "text": "고점권 대량거래 + 긴 위꼬리 + 변동성 급증 = 물량 손바뀜. 분할 익절."
+        },
+        {
+          "id": "topping_pattern",
+          "t": "천정 패턴",
+          "metric_any": ["head_shoulders", "double_top", "evening_star"],
+          "text": "헤드앤숄더 넥라인 이탈 · 쌍봉 · 이브닝스타 = 추세 전환 경보."
+        }
+      ]
+    }
+  },
+  "pyramiding": {
+    "text": "상승할수록 추가 비중을 줄인다. 평균단가 급등을 막는 것이 목적이다.",
+    "default_splits": [0.5, 0.3, 0.2],
+    "presets": {
+      "3단_50_30_20": [0.5, 0.3, 0.2],
+      "3단_40_35_25": [0.4, 0.35, 0.25],
+      "4단_40_30_20_10": [0.4, 0.3, 0.2, 0.1]
+    },
+    "constraints": {
+      "require_prior_tranche_profitable": true,
+      "raise_stop_on_each_add": true,
+      "max_total_account_weight_pct": 25
+    },
+    "note": "직전 차수가 손실 중이면 추가 매수는 물타기다. 규칙상 금지."
+  },
+  "sizing": {
+    "default_risk_pct": 1,
+    "max_risk_pct": 2,
+    "text": "1회 매매의 최대 손실을 계좌의 1~2%로 제한한다. 수량 = 계좌×리스크% ÷ (진입가−손절가)"
+  }
+}

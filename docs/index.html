@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0">
+<title>주도주 스윙 콘솔</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0A1A22">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icon-192.png">
+<!-- 외부 CDN 없음: 오프라인 동작과 첫 페인트 속도를 위해 폰트도 시스템 스택을 쓴다 -->
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<header>
+  <div class="hrow">
+    <h1>스윙 콘솔</h1>
+    <div class="seg" id="mkt-seg">
+      <button data-m="us" class="on">미장</button>
+      <button data-m="kr">국장</button>
+    </div>
+  </div>
+  <p class="asof" id="asof">불러오는 중…</p>
+</header>
+
+<main>
+
+<!-- ═══════════ 오늘 ═══════════ -->
+<section id="p-today" class="page on">
+  <div class="light" id="market-light">
+    <span class="dot"></span>
+    <span class="txt">시장 필터 확인 중<span class="sub2">지수가 막히면 셋업보다 현금이 먼저다</span></span>
+  </div>
+
+  <div class="card">
+    <h2>오늘 할 일 <span class="r" id="todo-count"></span></h2>
+    <div id="todo"></div>
+  </div>
+
+  <div class="card">
+    <h2>스캔 후보 <span class="r" id="cand-count"></span></h2>
+    <p class="note">거래량 검증(20일 평균 1.5배)을 통과하지 못한 신호는 흐리게 표시된다.</p>
+    <div id="cands"></div>
+    <button class="act ghost" id="reload">새로고침</button>
+  </div>
+</section>
+
+<!-- ═══════════ 차트 ═══════════ -->
+<section id="p-chart" class="page">
+  <div class="card" style="padding:10px 12px">
+    <div class="f" style="margin:0">
+      <select id="chart-pick"><option value="">후보를 선택하세요</option></select>
+    </div>
+  </div>
+  <div class="chartwrap">
+    <canvas id="chart"></canvas>
+    <div class="chartinfo" id="chart-info"></div>
+    <div class="legend">
+      <span><i style="background:#F2B33D"></i>MA20</span>
+      <span><i style="background:#4EA3FF"></i>MA60</span>
+      <span><i style="background:#8FAEB8"></i>MA120</span>
+      <span><i style="background:#7A6BD8"></i>볼린저 ±2σ</span>
+      <span><i style="background:#2ED47A"></i>지지</span>
+      <span><i style="background:#FF5B6E"></i>저항</span>
+    </div>
+  </div>
+  <div class="card">
+    <h2>지표 판독</h2>
+    <div id="chart-metrics"><p class="empty">종목을 선택하면 지표가 표시된다.</p></div>
+  </div>
+</section>
+
+<!-- ═══════════ 포지션 ═══════════ -->
+<section id="p-pos" class="page">
+  <div class="card">
+    <h2>보유 포지션 <span class="r" id="pos-count"></span></h2>
+    <div id="pos-list"></div>
+  </div>
+
+  <div class="card">
+    <h2>신규 포지션</h2>
+    <p class="note">손절가 없이는 등록할 수 없다. 진입 전에 나갈 지점을 먼저 정한다.</p>
+    <div class="grid2">
+      <div class="f"><label>티커 / 종목명</label><input id="np-tick" type="text" placeholder="NVDA"></div>
+      <div class="f"><label>진입가</label><input id="np-entry" type="number" inputmode="decimal"></div>
+      <div class="f"><label>수량</label><input id="np-qty" type="number" inputmode="numeric"></div>
+      <div class="f"><label>손절가 (필수)</label><input id="np-stop" type="number" inputmode="decimal"></div>
+    </div>
+    <div class="grid2">
+      <div class="f"><label>추적 방식</label>
+        <select id="np-trail">
+          <option value="ma20">20일선 종가 이탈</option>
+          <option value="ma10">10일선 종가 이탈</option>
+          <option value="ma5">5일선 종가 이탈</option>
+          <option value="atr">ATR 배수</option>
+          <option value="pct">고점 대비 %</option>
+        </select>
+      </div>
+      <div class="f"><label>추적 파라미터</label><input id="np-trailp" type="number" inputmode="decimal" value="2.5"></div>
+    </div>
+    <div class="f"><label>진입 근거 (일지에 기록된다)</label><input id="np-why" type="text" placeholder="컵앤핸들 피봇 돌파, 거래량 2.4배"></div>
+    <button class="act" id="np-add">포지션 등록</button>
+  </div>
+
+  <div class="card">
+    <h2>장중 감시 내보내기</h2>
+    <p class="note">포지션은 이 기기에만 저장된다. 폰이 꺼져 있어도 손절 알림을 받으려면
+      아래 JSON을 저장소의 <code>POSITIONS_JSON</code> 시크릿에 붙여넣는다.
+      공개 저장소에 포지션을 커밋하지 않기 위한 방식이다.</p>
+    <button class="act ghost" id="pos-export">감시용 JSON 복사</button>
+  </div>
+</section>
+
+<!-- ═══════════ 체크 ═══════════ -->
+<section id="p-check" class="page">
+  <div class="card" style="padding:10px 12px">
+    <div class="f" style="margin:0">
+      <select id="check-pick"><option value="">종목 선택 — 자동 판정 항목이 채워진다</option></select>
+    </div>
+  </div>
+
+  <div id="rule-groups"></div>
+
+  <div class="card">
+    <div class="score">
+      <span class="n" id="rule-score">0</span><span class="d">/ 100</span>
+      <span class="verdict v-no" id="rule-verdict">미달</span>
+    </div>
+    <div class="bar"><i id="rule-bar" style="width:0%"></i></div>
+    <p class="note" id="rule-auto" style="margin:10px 0 0"></p>
+  </div>
+
+  <div class="card">
+    <h2>매도 규칙 — 진입 전 확정</h2>
+    <div id="exit-rules"></div>
+  </div>
+
+  <div class="card">
+    <h2>포지션 사이징 — 1R 기준</h2>
+    <p class="note">계좌 대비 감당할 손실을 먼저 정하고 수량을 역산한다.</p>
+    <div class="grid2">
+      <div class="f"><label>계좌 총액</label><input id="acct" type="number" inputmode="decimal" value="10000000"></div>
+      <div class="f"><label>거래당 리스크 %</label><input id="risk" type="number" inputmode="decimal" value="1"></div>
+      <div class="f"><label>진입가</label><input id="entry" type="number" inputmode="decimal" value="50000"></div>
+      <div class="f"><label>손절가</label><input id="stop" type="number" inputmode="decimal" value="47000"></div>
+    </div>
+    <div class="out">
+      <div class="row hi"><span>매수 수량</span><b id="o-qty">—</b></div>
+      <div class="row"><span>투입 금액</span><b id="o-cost">—</b></div>
+      <div class="row"><span>계좌 비중</span><b id="o-w">—</b></div>
+      <div class="row bad"><span>1R 손실액</span><b id="o-r">—</b></div>
+      <div class="row"><span>2R 목표가</span><b id="o-t2">—</b></div>
+      <div class="row"><span>3R 목표가</span><b id="o-t3">—</b></div>
+    </div>
+    <div class="sep"></div>
+    <h2>피라미딩 분할 계획</h2>
+    <p class="note">올라갈수록 비중을 줄인다. 직전 차수가 손실 중이면 추가 매수는 물타기다.</p>
+    <div id="pyramid"></div>
+  </div>
+
+  <div class="card">
+    <h2>관심종목</h2>
+    <div class="grid2">
+      <div class="f"><label>티커 / 종목명</label><input id="wl-tick" type="text" placeholder="NVDA"></div>
+      <div class="f"><label>메모</label><input id="wl-memo" type="text" placeholder="피봇 128.4"></div>
+    </div>
+    <button class="act" id="wl-add">현재 점수로 저장</button>
+    <ul class="lst" id="wl-list"></ul>
+    <p class="empty" id="wl-empty">저장된 종목이 없다.</p>
+  </div>
+</section>
+
+<!-- ═══════════ 일지 ═══════════ -->
+<section id="p-log" class="page">
+  <div class="card">
+    <h2>룰셋 검증 <span class="r" id="bt-asof"></span></h2>
+    <p class="note">백테스트가 측정한 현행 규칙의 기대값. 이 값이 검증되기 전까지
+      체크리스트 점수는 근거 없는 숫자다.</p>
+    <div id="bt-box"><p class="empty">백테스트 미실행 — Actions → 백테스트 → Run workflow</p></div>
+  </div>
+  <div class="card">
+    <h2>내 매매 통계</h2>
+    <div class="out" id="log-stats"></div>
+    <p class="note" style="margin-top:10px">기대값 = 승률×평균수익R − 패률×평균손실R.
+      이 값이 0 이하면 규칙이 아니라 매매 자체를 멈추는 것이 맞다.</p>
+  </div>
+  <div class="card">
+    <h2>매매 기록 <span class="r" id="log-count"></span></h2>
+    <div id="log-list"></div>
+  </div>
+  <div class="card">
+    <h2>데이터</h2>
+    <div class="btnrow">
+      <button class="act ghost" id="log-export">전체 내보내기</button>
+      <button class="act danger" id="log-clear">일지 삭제</button>
+    </div>
+  </div>
+</section>
+
+<p class="disc">이 도구는 매매 판단을 기록하고 계산하기 위한 개인용 체크리스트다.
+투자 자문이 아니며, 주문 체결 기능은 없다. 모든 매매 결과의 책임은 사용자에게 있다.</p>
+</main>
+
+<nav class="tabbar" id="tabbar">
+  <button data-p="today" class="on"><span class="ic">◎</span>오늘</button>
+  <button data-p="chart"><span class="ic">◫</span>차트</button>
+  <button data-p="pos"><span class="ic">▤</span>포지션<span class="badge" id="pos-badge" hidden></span></button>
+  <button data-p="check"><span class="ic">✓</span>체크</button>
+  <button data-p="log"><span class="ic">≡</span>일지</button>
+</nav>
+
+<div class="toast" id="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>

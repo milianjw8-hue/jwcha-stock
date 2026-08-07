@@ -1,0 +1,116 @@
+name: 백테스트
+
+# 룰셋의 기대값을 실측한다. 데이터 수집이 오래 걸리므로 수동 실행과 월 1회 스케줄만 둔다.
+# 결과는 docs/backtest_<market>.{json,md} 로 커밋되어 앱 일지 탭에 표시된다.
+
+on:
+  workflow_dispatch:
+    inputs:
+      market:
+        description: 시장
+        type: choice
+        options: [us, kr, both]
+        default: us
+      start:
+        description: 시작일 (YYYY-MM-DD)
+        default: "2019-01-01"
+      split:
+        description: 학습/검증 분할 기준일
+        default: "2024-01-01"
+      universe:
+        description: 국장 분기별 상위 N종목
+        default: "150"
+  schedule:
+    - cron: "0 20 1 * *"   # 매월 1일 05:00 KST
+
+permissions:
+  contents: write
+
+concurrency:
+  group: backtest
+  cancel-in-progress: false
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+
+      # 백테스트 코드가 아직 병합되지 않은 ref 에서도 이 워크플로가 돌 수 있다.
+      # (workflow_dispatch 노출을 위해 워크플로 파일을 기본 브랜치에 먼저 올리는 경우)
+      # 그때 실패로 뜨지 않도록 조용히 건너뛴다.
+      - name: 백테스트 코드 확인
+        id: check
+        run: |
+          if [ -f backtest/run.py ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::이 ref(${{ github.ref_name }})에는 backtest/run.py 가 없다 — 건너뜀"
+          fi
+
+      - uses: actions/setup-python@v5
+        if: steps.check.outputs.ok == 'true'
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: scanner/requirements.txt
+
+      - name: 의존성 설치
+        if: steps.check.outputs.ok == 'true'
+        run: pip install -r scanner/requirements.txt
+
+      # 일봉은 과거분이 바뀌지 않으므로 캐시가 그대로 유효하다.
+      # 재실행 시 데이터 수집 단계를 통째로 건너뛴다.
+      - name: 시세 캐시 복원
+        if: steps.check.outputs.ok == 'true'
+        uses: actions/cache@v4
+        with:
+          path: backtest/cache
+          key: bt-cache-${{ github.event.inputs.market || 'sched' }}-${{ github.run_id }}
+          restore-keys: |
+            bt-cache-${{ github.event.inputs.market || 'sched' }}-
+            bt-cache-
+
+      - name: 백테스트 실행
+        if: steps.check.outputs.ok == 'true'
+        env:
+          KRX_ID: ${{ secrets.KRX_ID }}
+          KRX_PW: ${{ secrets.KRX_PW }}
+          MARKET: ${{ github.event.inputs.market || 'us' }}
+          START: ${{ github.event.inputs.start || '2019-01-01' }}
+          SPLIT: ${{ github.event.inputs.split || '2024-01-01' }}
+          UNIVERSE: ${{ github.event.inputs.universe || '150' }}
+        run: |
+          set -e
+          run_one() {
+            echo "::group::백테스트 $1"
+            python backtest/run.py --market "$1" --start "$START" \
+              --split "$SPLIT" --universe "$UNIVERSE"
+            echo "::endgroup::"
+          }
+          if [ "$MARKET" = "both" ]; then
+            run_one us
+            run_one kr
+          else
+            run_one "$MARKET"
+          fi
+
+      # 실행한 브랜치에 그대로 커밋한다. main 으로 하드코딩하면 기능 브랜치에서
+      # 돌렸을 때 그 브랜치 내용이 main 으로 밀려 들어간다.
+      - name: 결과 커밋
+        if: steps.check.outputs.ok == 'true'
+        env:
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/backtest_*.json docs/backtest_*.md 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "변경 없음 — 커밋 생략"
+            exit 0
+          fi
+          git commit -m "chore: 백테스트 리포트 갱신 ($(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M KST'))"
+          git pull --rebase origin "$BRANCH"
+          git push origin "HEAD:$BRANCH"

@@ -1,0 +1,36 @@
+# Logs
+logs/
+*.log
+*.txt
+!scanner/*.txt
+
+# Output files
+output/*.hwpx
+output/*.hwp
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Temp
+*.tmp
+*.temp
+backtest/cache/

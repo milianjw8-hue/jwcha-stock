@@ -1,0 +1,52 @@
+name: 포지션 감시
+
+# 보유 포지션의 손절·트레일링 스탑·청산 경보를 장중에 텔레그램으로 푸시한다.
+# POSITIONS_JSON 시크릿이 비어 있으면 즉시 종료한다(비용 없음).
+# 포지션은 시크릿에만 두고 저장소에 커밋하지 않는다.
+
+on:
+  schedule:
+    - cron: "*/15 0-6 * * 1-5"    # 국장 09:00~15:30 KST (00:00~06:30 UTC)
+    - cron: "*/15 14-20 * * 1-5"  # 미장 정규장 (14:30~21:00 UTC, DST 포함 여유)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: watch-positions
+  cancel-in-progress: true
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: scanner/requirements.txt
+
+      - name: 의존성 설치
+        run: pip install -r scanner/requirements.txt
+
+      # 같은 경보를 15분마다 반복 발송하지 않도록 발송 이력을 실행 간 유지한다.
+      # 캐시는 저장소 스코프라 공개 웹에 노출되지 않는다.
+      - name: 경보 상태 복원
+        uses: actions/cache@v4
+        with:
+          path: .watch_state.json
+          key: watch-state-${{ github.run_id }}
+          restore-keys: watch-state-
+
+      - name: 감시 실행
+        run: python scanner/watch_positions.py
+        env:
+          KRX_ID: ${{ secrets.KRX_ID }}
+          KRX_PW: ${{ secrets.KRX_PW }}
+          POSITIONS_JSON: ${{ secrets.POSITIONS_JSON }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
