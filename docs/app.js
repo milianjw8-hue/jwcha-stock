@@ -502,7 +502,10 @@ function evalPosition(p) {
   var a = avgOf(p), cur = quoteOf(p), src = findData(p.mkt, p.tick);
   var m = src ? src.metrics : null;
   var risk0 = p.entry0 - p.stop0;
-  var r = (cur != null && risk0 > 0) ? (cur - a.avg) / risk0 : null;
+  // 기존 보유는 등록일 가격(entry0)이 0R 지점이다. 매수단가로 재면 이미 물린 종목이
+  // -3R 처럼 나와 앞으로의 위험을 읽을 수 없다. 실제 손익은 pct 가 따로 보여준다.
+  var rBase = p.legacy ? p.entry0 : a.avg;
+  var r = (cur != null && risk0 > 0) ? (cur - rBase) / risk0 : null;
   var pct = (cur != null && a.avg) ? (cur / a.avg - 1) * 100 : null;
   var high = Math.max(p.high || 0, cur || 0, p.entry0);
 
@@ -547,6 +550,7 @@ function renderPositions() {
     card.innerHTML =
       '<div class="ph"><span class="nm">' + esc(posName(p)) + "</span>" +
       '<span class="chip">' + (p.mkt === "kr" ? "국장" : "미장") + "</span>" +
+      (p.legacy ? '<span class="chip warn">기존 보유</span>' : "") +
       '<span class="r ' + (v.r > 0 ? "up" : v.r < 0 ? "dn" : "") + '">' +
       (v.r == null ? "—" : (v.r >= 0 ? "+" : "") + v.r.toFixed(2) + "R") + "</span></div>" +
       '<div class="kv">' +
@@ -555,7 +559,11 @@ function renderPositions() {
       "<span>손절선</span><span>" + nf(v.stop, 2) + (v.trail && v.trail > p.stop0 ? " ▲추적" : "") + "</span>" +
       "<span>최고가</span><span>" + nf(v.high, 2) + "</span>" +
       "<span>1차 익절</span><span>" + (v.target1 == null ? "—" : nf(v.target1, 2)) + "</span>" +
-      "</div>";
+      (p.legacy ? "<span>관리 시작가</span><span>" + nf(p.entry0, 2) +
+        (p.adopted ? " (" + esc(p.adopted) + ")" : "") + "</span>" : "") +
+      "</div>" +
+      (p.legacy ? '<p class="hold-note">R 은 <b>관리 시작가</b> 기준이다 — 오늘부터 감수하는 위험. ' +
+        "괄호 안 %가 실제 매수단가 대비 손익이다.</p>" : "");
 
     // 살 때의 근거가 아직 유효한지. 점수가 무너졌으면 경보가 없어도 팔 이유가 된다.
     if (v.rule) {
@@ -582,6 +590,11 @@ function renderPositions() {
           ? "<b>다음 차수</b> " + pl.next.no + "차 · 비중 " + Math.round(pl.next.frac * 100) + "% · 약 " + nf(pl.next.qty) + "주"
           : "<b>추가 매수 잠금</b> 직전 차수가 손실 중이다. 추가 매수는 물타기다.");
       card.appendChild(box2);
+    } else if (pl.legacy) {
+      card.appendChild(el("div", pl.lastProfitable ? "okbox" : "alertbox",
+        pl.lastProfitable
+          ? "<b>분할 계획 없음</b> 이 앱 밖에서 산 종목이다. 더 사려면 체크 탭에서 새 종목처럼 점검하고 수량을 정한다."
+          : "<b>추가 매수 잠금</b> 매수단가 아래다. 여기서 더 사는 것은 물타기다."));
     }
 
     var row = el("div", "btnrow");
@@ -615,6 +628,8 @@ function pyramidPlan(p) {
   var last = p.tranches[done - 1];
   var lastProfitable = !!(v != null && last && v > last.px);
   if (done >= splits.length) return { next: null, lastProfitable: lastProfitable, splits: splits };
+  // 기존 보유는 분할 계획 자체가 없다. 없는 계획의 "다음 차수"를 권할 수는 없다.
+  if (p.legacy && done <= 1) return { next: null, lastProfitable: lastProfitable, splits: splits, legacy: true };
   var totalQty = p.planQty || (p.tranches[0].qty / splits[0]);
   return {
     next: { no: done + 1, frac: splits[done], qty: Math.floor(totalQty * splits[done]) },
@@ -624,17 +639,20 @@ function pyramidPlan(p) {
 
 function addTranche(idx) {
   var p = S.positions[idx], pl = pyramidPlan(p);
-  if (!pl.next) { toast("분할 계획을 모두 소진했다"); return; }
   if (!pl.lastProfitable) { toast("직전 차수가 손실 중 — 추가 매수 금지"); return; }
-  var px = parseFloat(prompt(p.tick + " " + pl.next.no + "차 매수가", String(quoteOf(p) || "")));
+  // 기존 보유는 정해둔 분할 비중이 없다. 수량을 강요하지 않고 사람이 정한다.
+  if (!pl.next && !pl.legacy) { toast("분할 계획을 모두 소진했다"); return; }
+  var no = pl.next ? pl.next.no : p.tranches.length + 1;
+  var px = parseFloat(prompt(posName(p) + " " + no + "차 매수가", String(quoteOf(p) || "")));
   if (!px) return;
-  var qty = parseInt(prompt("수량 (권장 " + pl.next.qty + "주)", String(pl.next.qty)), 10);
+  var qty = parseInt(prompt(pl.next ? "수량 (권장 " + pl.next.qty + "주)" : "수량",
+    pl.next ? String(pl.next.qty) : ""), 10);
   if (!qty) return;
   p.tranches.push({ px: px, qty: qty, d: today() });
   // 추가 매수 때마다 손절선을 함께 올린다 (규칙: raise_stop_on_each_add)
   var newStop = parseFloat(prompt("올릴 손절가 (현재 " + evalPosition(p).stop + ")", String(evalPosition(p).stop)));
   if (newStop) p.stopManual = newStop;
-  save("positions"); renderPositions(); toast(pl.next.no + "차 매수 기록됨");
+  save("positions"); renderPositions(); toast(no + "차 매수 기록됨");
 }
 
 function closePosition(idx) {
@@ -674,6 +692,77 @@ function looksLikeTicker(mkt, t) {
   return mkt === "kr" ? /^\d{6}$/.test(t) : /^[A-Z][A-Z.\-]{0,6}$/.test(t);
 }
 function npMarket() { return $("np-mkt").value === "kr" ? "kr" : "us"; }
+function npLegacy() { return !!$("np-legacy").checked; }
+
+/* 손절선 후보 — 차트가 실제로 지지한 자리에서 뽑는다.
+   매수가에서 몇 % 같은 임의의 숫자는 시장이 알 바 아니다. */
+function stopIdeas(mkt, tick, ref) {
+  var c = findData(mkt, tick);
+  if (!c || !c.metrics) return [];
+  var m = c.metrics, px = ref || m.close;
+  if (!px) return [];
+  var out = [];
+
+  // 여러 번 되돌려세운 자리 바로 아래 — 우선순위가 가장 높다
+  (m.sr_levels || []).filter(function (l) { return l.kind === "support" && l.price < px; })
+    .sort(function (a, b) { return b.price - a.price; })
+    .slice(0, 2)
+    .forEach(function (l) {
+      out.push({ px: l.price * 0.99, why: "지지선 아래 (" + l.touches + "번 지지)" });
+    });
+  if (m.atr14) out.push({ px: px - m.atr14 * 2.5, why: "변동폭(ATR) 2.5배" });
+  ["ma20", "ma60"].forEach(function (k) {
+    if (m[k] != null && m[k] < px) out.push({ px: m[k] * 0.99, why: k.toUpperCase() + " 아래" });
+  });
+
+  // 손절폭 25% 넘는 후보는 실전에서 못 지킨다. 너무 가까운 것(2% 미만)은 노이즈에 털린다.
+  return out.filter(function (o) {
+    var d = (px - o.px) / px * 100;
+    return d >= 2 && d <= 25;
+  }).sort(function (a, b) { return b.px - a.px; }).slice(0, 4);
+}
+
+function renderStopIdeas() {
+  var box = $("np-stops"), lab = $("np-stops-lab");
+  box.innerHTML = "";
+  var mkt = npMarket(), raw = $("np-tick").value.trim();
+  var hit = resolveTicker(mkt, raw);
+  var ref = parseFloat($(npLegacy() ? "np-cur" : "np-entry").value) ||
+            (hit && hit.close) || null;
+  var ideas = hit ? stopIdeas(mkt, hit.ticker, ref) : [];
+  lab.hidden = !ideas.length;
+  if (!ideas.length) return;
+
+  var qty = parseInt($("np-qty").value, 10) || 0;
+  var base = ref || (hit && hit.close);
+  var cost = parseFloat($("np-entry").value) || 0;   // 실제 매수단가
+  var unit = mkt === "kr" ? "원" : "$";
+
+  ideas.forEach(function (o) {
+    var px = mkt === "kr" ? Math.round(o.px) : Math.round(o.px * 100) / 100;
+    var pct = base ? (px - base) / base * 100 : null;
+    // 이미 이익 중인 기존 보유는 손절선에 닿아도 손실이 아니다. "손실"로 적으면 거짓말이다.
+    var net = (qty && cost) ? (px - cost) * qty : 0;
+    var netTxt = net === 0 ? "" :
+      (net > 0 ? " · 여기서 정리해도 +" + nf(net) + unit
+               : " · 손실 " + nf(Math.abs(net)) + unit);
+    var b = el("button", "chip tap",
+      "<b>" + esc(nf(px, 2)) + "</b> " + (pct == null ? "" : "<i>" + pf(pct) + "</i>") +
+      "<span>" + esc(o.why) + esc(netTxt) + "</span>");
+    b.addEventListener("click", function () {
+      $("np-stop").value = String(px);
+      renderStopIdeas();
+    });
+    box.appendChild(b);
+  });
+}
+
+function syncLegacyForm() {
+  var lg = npLegacy();
+  $("np-cur-f").hidden = !lg;
+  $("np-entry-lab").textContent = lg ? "내 매수단가 (평단)" : "진입가";
+  renderStopIdeas();
+}
 
 function updateNpHint() {
   var mkt = npMarket(), raw = $("np-tick").value.trim();
@@ -703,25 +792,37 @@ function addPosition() {
   // 이름으로 찾았으면 코드로 바꿔 저장한다. 한글 이름에 toUpperCase 는 의미가 없다.
   var tick = hit ? hit.ticker : raw.toUpperCase();
   var name = hit ? (hit.name || hit.ticker) : "";
+  var lg = npLegacy();
   var entry = parseFloat($("np-entry").value), qty = parseInt($("np-qty").value, 10);
   var stop = parseFloat($("np-stop").value);
+  // 기존 보유는 매수가가 아니라 오늘 가격에서 위험을 다시 센다. 산 값은 이미 매몰비용이다.
+  var cur = lg ? (parseFloat($("np-cur").value) || (hit && hit.close) || 0) : 0;
+  var base = lg ? cur : entry;
+
   if (!tick) { $("np-tick").focus(); return toast("종목을 입력하세요"); }
-  if (!entry || !qty) { return toast("진입가와 수량을 입력하세요"); }
+  if (!entry || !qty) { return toast((lg ? "매수단가" : "진입가") + "와 수량을 입력하세요"); }
+  if (lg && !cur) { $("np-cur").focus(); return toast("지금 가격을 입력하세요"); }
   if (!stop) { $("np-stop").focus(); return toast("손절가 없이는 등록할 수 없다"); }
-  if (stop >= entry) { $("np-stop").focus(); return toast("손절가는 진입가보다 낮아야 한다 (지금 " + nf(stop, 2) + " ≥ " + nf(entry, 2) + ")"); }
+  if (stop >= base) {
+    $("np-stop").focus();
+    return toast("손절가는 " + (lg ? "지금 가격" : "진입가") + "보다 낮아야 한다 (지금 " +
+      nf(stop, 2) + " ≥ " + nf(base, 2) + ")");
+  }
   var py = S.rules.exit && S.rules.exit.pyramiding;
   var splits = (py && py.default_splits) || [0.5, 0.3, 0.2];
   S.positions.unshift({
-    id: Date.now(), mkt: mkt, tick: tick, name: name,
+    id: Date.now(), mkt: mkt, tick: tick, name: name, legacy: lg,
     tranches: [{ px: entry, qty: qty, d: today() }],
-    planQty: Math.round(qty / splits[0]),
-    entry0: entry, stop0: stop, stopManual: 0, high: entry,
+    planQty: lg ? qty : Math.round(qty / splits[0]),
+    // legacy 는 entry0 가 "오늘부터의 기준가"다. 평단(tranches[0].px)과 다르다.
+    entry0: base, stop0: stop, stopManual: 0, high: Math.max(base, entry),
+    cur: lg ? cur : 0, curAt: lg ? today() : "",
     trail: { mode: $("np-trail").value, p: parseFloat($("np-trailp").value) || 0 },
-    why: $("np-why").value.trim(), opened: today()
+    why: $("np-why").value.trim(), opened: today(), adopted: lg ? today() : ""
   });
   save("positions");
-  ["np-tick", "np-entry", "np-qty", "np-stop", "np-why"].forEach(function (i) { $(i).value = ""; });
-  updateNpHint();
+  ["np-tick", "np-entry", "np-qty", "np-cur", "np-stop", "np-why"].forEach(function (i) { $(i).value = ""; });
+  updateNpHint(); renderStopIdeas();
   renderPositions(); renderTodo(); toast((name || tick) + " 등록됨");
 }
 
@@ -995,6 +1096,7 @@ function fillPickers() {
     dl.appendChild(o);
   });
   updateNpHint();
+  renderStopIdeas();
 }
 
 /* ══════════ 렌더 총괄 / 탭 ══════════ */
@@ -1048,9 +1150,13 @@ function bindEvents() {
   });
 
   $("np-add").addEventListener("click", addPosition);
-  $("np-tick").addEventListener("input", updateNpHint);
+  $("np-tick").addEventListener("input", function () { updateNpHint(); renderStopIdeas(); });
   // 시장이 바뀌면 자동완성 목록도 바뀐다
   $("np-mkt").addEventListener("change", function () { fillPickers(); });
+  $("np-legacy").addEventListener("change", syncLegacyForm);
+  ["np-entry", "np-cur", "np-qty"].forEach(function (i) {
+    $(i).addEventListener("input", renderStopIdeas);
+  });
   $("pos-export").addEventListener("click", exportPositions);
   ["acct", "risk", "entry", "stop"].forEach(function (i) {
     $(i).addEventListener("input", calcSizing);

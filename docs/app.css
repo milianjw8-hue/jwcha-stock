@@ -202,6 +202,23 @@ button.danger{background:transparent;border:1px solid var(--bad);color:var(--bad
 .hold-rule.warn{border-color:rgba(255,183,77,.4);color:#FFDDA6}
 .hold-rule.bad{border-color:rgba(255,91,110,.4);color:#FFC3CB}
 .hold-none{margin-top:9px;font-size:11.5px;color:var(--dim);line-height:1.5}
+.hold-note{margin:7px 0 0;font-size:11.5px;color:var(--dim);line-height:1.5}
+.hold-note b{color:var(--text)}
+
+/* 기존 보유 종목 등록 */
+.chk{display:flex;align-items:center;gap:9px;margin:0 0 12px;font-size:13px;
+  min-height:40px;cursor:pointer}
+.chk input{width:20px;height:20px;accent-color:var(--accent);flex:0 0 20px}
+#np-stops{display:grid;gap:7px;margin-bottom:12px}
+#np-stops:empty{margin:0}
+.chip.tap{display:block;text-align:left;border:1px solid var(--line);background:var(--panel2);
+  color:var(--text);border-radius:10px;padding:9px 12px;cursor:pointer;font-family:inherit;
+  font-size:13px;width:100%}
+.chip.tap b{font-family:'JetBrains Mono',monospace;font-weight:700;margin-right:7px}
+.chip.tap i{font-style:normal;color:var(--dim);font-size:12px}
+.chip.tap span{display:block;font-size:11.5px;color:var(--dim);margin-top:2px}
+.chip.tap:active{background:var(--accent);color:var(--ink)}
+.chip.tap:active i,.chip.tap:active span{color:var(--ink)}
 .pos .met{margin-top:9px}
 
 .tranche{display:flex;align-items:center;gap:9px;padding:8px 0;font-size:12.5px;
