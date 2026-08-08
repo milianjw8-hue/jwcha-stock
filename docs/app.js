@@ -477,6 +477,12 @@ function renderChartMetrics(c) {
 }
 
 /* ══════════ 포지션 ══════════ */
+// 국장 포지션을 코드로만 보여주면 무슨 종목인지 알 수 없다
+function posName(p) {
+  if (p.name) return p.name;
+  var c = findData(p.mkt, p.tick);
+  return (c && c.name) || p.tick;
+}
 function avgOf(p) {
   var q = 0, s = 0;
   p.tranches.forEach(function (t) { q += t.qty; s += t.qty * t.px; });
@@ -539,7 +545,7 @@ function renderPositions() {
     var cls = v.alerts.length ? "alert" : (v.r > 0 ? "win" : v.r < 0 ? "lose" : "");
     var card = el("div", "pos " + cls);
     card.innerHTML =
-      '<div class="ph"><span class="nm">' + esc(p.tick) + "</span>" +
+      '<div class="ph"><span class="nm">' + esc(posName(p)) + "</span>" +
       '<span class="chip">' + (p.mkt === "kr" ? "국장" : "미장") + "</span>" +
       '<span class="r ' + (v.r > 0 ? "up" : v.r < 0 ? "dn" : "") + '">' +
       (v.r == null ? "—" : (v.r >= 0 ? "+" : "") + v.r.toFixed(2) + "R") + "</span></div>" +
@@ -653,17 +659,60 @@ function closePosition(idx) {
 
 function today() { return new Date().toISOString().slice(0, 10); }
 
+/* 국장 종목코드는 아무도 외우지 않는다. "BGF리테일" 로 쳐도 282330 을 찾아준다.
+   스캐너·감시는 코드로만 조회하므로, 이름을 그대로 저장하면 영영 데이터가 붙지 않는다. */
+function known(mkt) { return candidates(mkt).concat(holdings(mkt)); }
+function norm(s) { return String(s == null ? "" : s).replace(/\s+/g, "").toLowerCase(); }
+function resolveTicker(mkt, input) {
+  var q = norm(input), list = known(mkt), i;
+  for (i = 0; i < list.length; i++) if (norm(list[i].ticker) === q) return list[i];
+  for (i = 0; i < list.length; i++) if (norm(list[i].name) === q) return list[i];
+  return null;
+}
+// 국장 종목코드는 6자리 숫자다. 이름을 못 찾았을 때 코드 형식인지로 경고를 가른다.
+function looksLikeTicker(mkt, t) {
+  return mkt === "kr" ? /^\d{6}$/.test(t) : /^[A-Z][A-Z.\-]{0,6}$/.test(t);
+}
+function npMarket() { return $("np-mkt").value === "kr" ? "kr" : "us"; }
+
+function updateNpHint() {
+  var mkt = npMarket(), raw = $("np-tick").value.trim();
+  var box = $("np-hint");
+  if (!raw) { box.textContent = ""; box.className = "note"; return; }
+  var hit = resolveTicker(mkt, raw);
+  if (hit) {
+    box.className = "note ok";
+    box.textContent = "✓ " + (hit.name || hit.ticker) + " (" + hit.ticker + ") — 지표·차트가 연결된다";
+  } else if (looksLikeTicker(mkt, raw.toUpperCase())) {
+    box.className = "note";
+    box.textContent = mkt === "kr"
+      ? "종목코드 형식은 맞다. 오늘 스캔·보유 목록에 없어서 지금은 지표가 붙지 않는다."
+      : "티커 형식은 맞다. 오늘 스캔·보유 목록에 없어서 지금은 지표가 붙지 않는다.";
+  } else {
+    box.className = "note warn";
+    box.textContent = mkt === "kr"
+      ? "⚠ 이름을 못 찾았다. 국장은 6자리 종목코드로 넣어야 지표가 붙는다 (예: BGF리테일 → 282330)."
+      : "⚠ 티커를 못 찾았다. 미장은 영문 티커로 넣는다 (예: NVDA).";
+  }
+}
+
 function addPosition() {
-  var tick = $("np-tick").value.trim().toUpperCase();
+  var mkt = npMarket();
+  var raw = $("np-tick").value.trim();
+  var hit = resolveTicker(mkt, raw);
+  // 이름으로 찾았으면 코드로 바꿔 저장한다. 한글 이름에 toUpperCase 는 의미가 없다.
+  var tick = hit ? hit.ticker : raw.toUpperCase();
+  var name = hit ? (hit.name || hit.ticker) : "";
   var entry = parseFloat($("np-entry").value), qty = parseInt($("np-qty").value, 10);
   var stop = parseFloat($("np-stop").value);
   if (!tick) { $("np-tick").focus(); return toast("종목을 입력하세요"); }
   if (!entry || !qty) { return toast("진입가와 수량을 입력하세요"); }
   if (!stop) { $("np-stop").focus(); return toast("손절가 없이는 등록할 수 없다"); }
-  if (stop >= entry) { $("np-stop").focus(); return toast("손절가는 진입가보다 낮아야 한다"); }
-  var splits = (S.rules.exit && S.rules.exit.pyramiding.default_splits) || [0.5, 0.3, 0.2];
+  if (stop >= entry) { $("np-stop").focus(); return toast("손절가는 진입가보다 낮아야 한다 (지금 " + nf(stop, 2) + " ≥ " + nf(entry, 2) + ")"); }
+  var py = S.rules.exit && S.rules.exit.pyramiding;
+  var splits = (py && py.default_splits) || [0.5, 0.3, 0.2];
   S.positions.unshift({
-    id: Date.now(), mkt: S.market, tick: tick,
+    id: Date.now(), mkt: mkt, tick: tick, name: name,
     tranches: [{ px: entry, qty: qty, d: today() }],
     planQty: Math.round(qty / splits[0]),
     entry0: entry, stop0: stop, stopManual: 0, high: entry,
@@ -672,7 +721,8 @@ function addPosition() {
   });
   save("positions");
   ["np-tick", "np-entry", "np-qty", "np-stop", "np-why"].forEach(function (i) { $(i).value = ""; });
-  renderPositions(); renderTodo(); toast(tick + " 등록됨");
+  updateNpHint();
+  renderPositions(); renderTodo(); toast((name || tick) + " 등록됨");
 }
 
 function exportPositions() {
@@ -934,6 +984,17 @@ function fillPickers() {
     }), "◆ ");
     if (cur && findData(S.market, cur)) sel.value = cur; else S.sel[pair[1]] = "";
   });
+
+  // 포지션 등록칸 자동완성 — 이름을 치면 폰 키보드가 후보를 띄운다
+  var dl = $("np-list"), mkt = npMarket();
+  dl.innerHTML = "";
+  known(mkt).forEach(function (c) {
+    var o = document.createElement("option");
+    o.value = c.name || c.ticker;
+    o.label = c.ticker;
+    dl.appendChild(o);
+  });
+  updateNpHint();
 }
 
 /* ══════════ 렌더 총괄 / 탭 ══════════ */
@@ -987,6 +1048,9 @@ function bindEvents() {
   });
 
   $("np-add").addEventListener("click", addPosition);
+  $("np-tick").addEventListener("input", updateNpHint);
+  // 시장이 바뀌면 자동완성 목록도 바뀐다
+  $("np-mkt").addEventListener("change", function () { fillPickers(); });
   $("pos-export").addEventListener("click", exportPositions);
   ["acct", "risk", "entry", "stop"].forEach(function (i) {
     $(i).addEventListener("input", calcSizing);
@@ -1021,6 +1085,8 @@ function boot() {
     S.manual = r[3] || {};
     if (r[5]) { $("acct").value = r[5].a; $("risk").value = r[5].rp; }
     setMarket(r[4] || "us");
+    // 등록칸 시장은 첫 화면 기준으로만 맞춘다. 이후엔 사용자가 고른 값을 건드리지 않는다.
+    $("np-mkt").value = S.market;
     calcSizing();
     return loadAll();
   });

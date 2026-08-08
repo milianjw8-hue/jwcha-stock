@@ -84,6 +84,9 @@ main{padding:12px 16px 0}
 .card h2 .r{margin-left:auto;font-size:11px;letter-spacing:0;color:var(--dim);
   text-transform:none;font-weight:400}
 .card .note{font-size:12px;color:var(--dim);margin:0 0 12px}
+.card .note:empty{margin:0}
+.card .note.ok{color:var(--up)}
+.card .note.warn{color:var(--warn)}
 .sep{height:1px;background:var(--line);margin:12px 0}
 
 /* ── 신호등 ───────────────────────────────────────── */

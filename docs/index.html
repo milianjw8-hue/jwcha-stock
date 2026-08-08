@@ -85,7 +85,17 @@
     <h2>신규 포지션</h2>
     <p class="note">손절가 없이는 등록할 수 없다. 진입 전에 나갈 지점을 먼저 정한다.</p>
     <div class="grid2">
-      <div class="f"><label>티커 / 종목명</label><input id="np-tick" type="text" placeholder="NVDA"></div>
+      <!-- 시장을 상단 탭에서 물려받으면 국장 종목이 미장으로 들어가도 알 수 없다 -->
+      <div class="f"><label>시장</label>
+        <select id="np-mkt">
+          <option value="us">미장</option>
+          <option value="kr">국장</option>
+        </select>
+      </div>
+      <div class="f"><label>티커 / 종목명</label>
+        <input id="np-tick" type="text" placeholder="NVDA" list="np-list" autocomplete="off">
+        <datalist id="np-list"></datalist>
+      </div>
       <div class="f"><label>진입가</label><input id="np-entry" type="number" inputmode="decimal"></div>
       <div class="f"><label>수량</label><input id="np-qty" type="number" inputmode="numeric"></div>
       <div class="f"><label>손절가 (필수)</label><input id="np-stop" type="number" inputmode="decimal"></div>
@@ -103,6 +113,7 @@
       <div class="f"><label>추적 파라미터</label><input id="np-trailp" type="number" inputmode="decimal" value="2.5"></div>
     </div>
     <div class="f"><label>진입 근거 (일지에 기록된다)</label><input id="np-why" type="text" placeholder="컵앤핸들 피봇 돌파, 거래량 2.4배"></div>
+    <p class="note" id="np-hint"></p>
     <button class="act" id="np-add">포지션 등록</button>
   </div>
 
