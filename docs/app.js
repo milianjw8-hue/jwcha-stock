@@ -4,6 +4,9 @@
 (function () {
 "use strict";
 
+// 화면 하단에 표시된다. sw.js 의 CACHE 와 함께 올린다.
+var APP_VER = "7";
+
 /* ══════════ 유틸 ══════════ */
 var $ = function (id) { return document.getElementById(id); };
 function esc(s) { var d = document.createElement("div"); d.textContent = String(s == null ? "" : s); return d.innerHTML; }
@@ -191,7 +194,10 @@ function chipsHTML(list) {
 /* ══════════ 오늘 탭 ══════════ */
 function renderToday() {
   var s = S.scan[S.market];
-  $("asof").textContent = s ? (S.market === "us" ? "미장" : "국장") + " · " + s.asof : "스캔 결과 없음 (Actions 첫 실행 전)";
+  // 버전을 띄워두면 "폰에 새 버전이 왔는지" 를 눈으로 확인할 수 있다
+  $("asof").textContent =
+    (s ? (S.market === "us" ? "미장" : "국장") + " · " + s.asof : "스캔 결과 없음 (Actions 첫 실행 전)") +
+    "  ·  v" + APP_VER;
 
   var lt = $("market-light");
   var ok = s && s.market_ok;
@@ -1196,7 +1202,38 @@ function boot() {
     calcSizing();
     return loadAll();
   });
-  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});
+  setupAutoUpdate();
+}
+
+/* 앱을 껍데기째 캐시하므로, 가만두면 폰은 몇 주 전 버전을 계속 연다.
+   새 서비스워커가 올라오면 스스로 새로고침해서 항상 최신을 쓰게 한다. */
+function setupAutoUpdate() {
+  if (!("serviceWorker" in navigator)) return;
+  var sw = navigator.serviceWorker;
+  var had = !!sw.controller;   // 최초 설치 때는 새로고침할 이유가 없다
+  var reloading = false;
+
+  sw.addEventListener("controllerchange", function () {
+    if (!had || reloading) return;
+    reloading = true;
+    try { sessionStorage.setItem("justUpdated", "1"); } catch (e) { /* 사파리 시크릿 모드 */ }
+    location.reload();
+  });
+
+  sw.register("sw.js").then(function (reg) {
+    reg.update();
+    // 홈 화면 앱은 종료되지 않고 잠들기만 한다. 다시 켤 때마다 새 버전을 확인한다.
+    document.addEventListener("visibilitychange", function () {
+      if (!document.hidden) reg.update();
+    });
+  }).catch(function () {});
+
+  try {
+    if (sessionStorage.getItem("justUpdated")) {
+      sessionStorage.removeItem("justUpdated");
+      setTimeout(function () { toast("최신 버전으로 업데이트했다"); }, 600);
+    }
+  } catch (e) { /* 저장소를 못 쓰면 알림만 생략한다 */ }
 }
 boot();
 })();
