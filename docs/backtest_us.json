@@ -1,0 +1,561 @@
+{
+ "market": "us",
+ "asof": "2026-09-01 22:12",
+ "period": {
+  "start": "2019-01-01",
+  "end": "2026-09-01",
+  "split": "2024-01-01"
+ },
+ "universe_size": 129,
+ "signals": 15942,
+ "params": {
+  "stop_pct": 5.0,
+  "first_target_r": 2.0,
+  "first_sell_frac": 0.5,
+  "be_after_target": true,
+  "trail_mode": "ma20",
+  "trail_param": 2.5,
+  "max_hold": 120,
+  "fail_breakout_days": 3,
+  "max_open": 8,
+  "cooldown": 10,
+  "gate_pct_of_high": 75.0,
+  "gate_vol_ratio": 1.5,
+  "require_market_ok": true
+ },
+ "stats": {
+  "research_all": {
+   "n": 2772,
+   "win_rate": 45.6,
+   "avg_win_r": 0.72,
+   "avg_loss_r": -0.568,
+   "expectancy_r": 0.019,
+   "total_r": 53.5,
+   "profit_factor": 1.06,
+   "max_drawdown_r": -74.3,
+   "max_consec_losses": 23,
+   "avg_bars": 4.1,
+   "exit_reasons": {
+    "실패돌파": 1886,
+    "손절": 513,
+    "ma20 이탈": 369,
+    "기간종료": 4
+   }
+  },
+  "research_train": {
+   "n": 1724,
+   "win_rate": 43.3,
+   "avg_win_r": 0.704,
+   "avg_loss_r": -0.562,
+   "expectancy_r": -0.014,
+   "total_r": -23.9,
+   "profit_factor": 0.96,
+   "max_drawdown_r": -74.3,
+   "max_consec_losses": 23,
+   "avg_bars": 3.9,
+   "exit_reasons": {
+    "실패돌파": 1171,
+    "손절": 331,
+    "ma20 이탈": 222
+   }
+  },
+  "research_test": {
+   "n": 1048,
+   "win_rate": 49.3,
+   "avg_win_r": 0.745,
+   "avg_loss_r": -0.579,
+   "expectancy_r": 0.074,
+   "total_r": 77.4,
+   "profit_factor": 1.25,
+   "max_drawdown_r": -47.2,
+   "max_consec_losses": 11,
+   "avg_bars": 4.6,
+   "exit_reasons": {
+    "실패돌파": 715,
+    "손절": 182,
+    "ma20 이탈": 147,
+    "기간종료": 4
+   }
+  },
+  "live_all": {
+   "n": 2,
+   "win_rate": 50.0,
+   "avg_win_r": 0.589,
+   "avg_loss_r": -0.1,
+   "expectancy_r": 0.244,
+   "total_r": 0.5,
+   "profit_factor": 5.89,
+   "max_drawdown_r": -0.1,
+   "max_consec_losses": 1,
+   "avg_bars": 1.0,
+   "exit_reasons": {
+    "실패돌파": 2
+   }
+  },
+  "live_train": {
+   "n": 2,
+   "win_rate": 50.0,
+   "avg_win_r": 0.589,
+   "avg_loss_r": -0.1,
+   "expectancy_r": 0.244,
+   "total_r": 0.5,
+   "profit_factor": 5.89,
+   "max_drawdown_r": -0.1,
+   "max_consec_losses": 1,
+   "avg_bars": 1.0,
+   "exit_reasons": {
+    "실패돌파": 2
+   }
+  },
+  "live_test": {
+   "n": 0
+  },
+  "tuned_train": {
+   "n": 67,
+   "win_rate": 35.8,
+   "avg_win_r": 1.127,
+   "avg_loss_r": -0.581,
+   "expectancy_r": 0.031,
+   "total_r": 2.1,
+   "profit_factor": 1.08,
+   "max_drawdown_r": -9.6,
+   "max_consec_losses": 8,
+   "avg_bars": 5.2,
+   "exit_reasons": {
+    "실패돌파": 36,
+    "손절": 17,
+    "ma20 이탈": 14
+   }
+  },
+  "tuned_test": {
+   "n": 39,
+   "win_rate": 51.3,
+   "avg_win_r": 1.031,
+   "avg_loss_r": -0.578,
+   "expectancy_r": 0.247,
+   "total_r": 9.6,
+   "profit_factor": 1.88,
+   "max_drawdown_r": -3.5,
+   "max_consec_losses": 7,
+   "avg_bars": 6.2,
+   "exit_reasons": {
+    "실패돌파": 20,
+    "ma20 이탈": 11,
+    "손절": 8
+   }
+  }
+ },
+ "retention": 7.97,
+ "overfit_warning": false,
+ "item_lift_train": [
+  {
+   "id": "us_a8",
+   "n_yes": 713,
+   "n_no": 1011,
+   "mean_r_yes": 0.005,
+   "mean_r_no": -0.027,
+   "lift": 0.032,
+   "t": 0.69,
+   "significant": false
+  },
+  {
+   "id": "us_a5",
+   "n_yes": 955,
+   "n_no": 769,
+   "mean_r_yes": -0.003,
+   "mean_r_no": -0.027,
+   "lift": 0.024,
+   "t": 0.56,
+   "significant": false
+  },
+  {
+   "id": "us_a6",
+   "n_yes": 1157,
+   "n_no": 567,
+   "mean_r_yes": -0.009,
+   "mean_r_no": -0.024,
+   "lift": 0.014,
+   "t": 0.35,
+   "significant": false
+  },
+  {
+   "id": "us_a2",
+   "n_yes": 1307,
+   "n_no": 417,
+   "mean_r_yes": -0.012,
+   "mean_r_no": -0.021,
+   "lift": 0.009,
+   "t": 0.18,
+   "significant": false
+  },
+  {
+   "id": "us_a1",
+   "n_yes": 1188,
+   "n_no": 536,
+   "mean_r_yes": -0.025,
+   "mean_r_no": 0.01,
+   "lift": -0.035,
+   "t": -0.76,
+   "significant": false
+  },
+  {
+   "id": "us_a3",
+   "n_yes": 1399,
+   "n_no": 325,
+   "mean_r_yes": -0.026,
+   "mean_r_no": 0.041,
+   "lift": -0.067,
+   "t": -1.15,
+   "significant": false
+  },
+  {
+   "id": "us_a4",
+   "n_yes": 1087,
+   "n_no": 637,
+   "mean_r_yes": -0.044,
+   "mean_r_no": 0.038,
+   "lift": -0.082,
+   "t": -1.79,
+   "significant": false
+  },
+  {
+   "id": "us_b1",
+   "n_yes": 40,
+   "n_no": 1684,
+   "mean_r_yes": -0.108,
+   "mean_r_no": -0.012,
+   "lift": -0.096,
+   "t": -0.77,
+   "significant": false
+  },
+  {
+   "id": "us_b2",
+   "n_yes": 34,
+   "n_no": 1690,
+   "mean_r_yes": -0.258,
+   "mean_r_no": -0.009,
+   "lift": -0.249,
+   "t": -2.35,
+   "significant": true
+  },
+  {
+   "id": "us_a7",
+   "n_yes": 1724,
+   "n_no": 0,
+   "lift": null,
+   "note": "표본 부족"
+  },
+  {
+   "id": "us_b3",
+   "n_yes": 1724,
+   "n_no": 0,
+   "lift": null,
+   "note": "표본 부족"
+  },
+  {
+   "id": "us_b4",
+   "n_yes": 1724,
+   "n_no": 0,
+   "lift": null,
+   "note": "표본 부족"
+  },
+  {
+   "id": "us_b6",
+   "n_yes": 1724,
+   "n_no": 0,
+   "lift": null,
+   "note": "표본 부족"
+  }
+ ],
+ "proposed_weights": {
+  "us_a1": 7.1,
+  "us_a2": 7.1,
+  "us_a3": 7.1,
+  "us_a4": 7.1,
+  "us_a5": 7.1,
+  "us_a6": 7.1,
+  "us_a7": 7.1,
+  "us_a8": 7.1,
+  "us_b1": 7.1,
+  "us_b2": 7.1,
+  "us_b3": 7.1,
+  "us_b4": 7.1,
+  "us_b5": 7.1,
+  "us_b6": 7.1
+ },
+ "core_blockers": [
+  {
+   "id": "us_b2",
+   "blocked": 15681,
+   "blocked_pct": 98.4,
+   "auto_judged": 15942,
+   "manual_only": false
+  },
+  {
+   "id": "us_b1",
+   "blocked": 15548,
+   "blocked_pct": 97.5,
+   "auto_judged": 15942,
+   "manual_only": false
+  },
+  {
+   "id": "us_a8",
+   "blocked": 9721,
+   "blocked_pct": 61.0,
+   "auto_judged": 15942,
+   "manual_only": false
+  },
+  {
+   "id": "us_a1",
+   "blocked": 4299,
+   "blocked_pct": 27.0,
+   "auto_judged": 15942,
+   "manual_only": false
+  },
+  {
+   "id": "us_a3",
+   "blocked": 2614,
+   "blocked_pct": 16.4,
+   "auto_judged": 15942,
+   "manual_only": false
+  },
+  {
+   "id": "us_a7",
+   "blocked": 0,
+   "blocked_pct": 0.0,
+   "auto_judged": 15942,
+   "manual_only": false
+  },
+  {
+   "id": "us_b4",
+   "blocked": 0,
+   "blocked_pct": 0.0,
+   "auto_judged": 15942,
+   "manual_only": false
+  }
+ ],
+ "score_distribution": [
+  {
+   "range": "0~49",
+   "n": 4486
+  },
+  {
+   "range": "50~59",
+   "n": 1987
+  },
+  {
+   "range": "60~69",
+   "n": 4237
+  },
+  {
+   "range": "70~79",
+   "n": 5046
+  },
+  {
+   "range": "80~84",
+   "n": 86
+  },
+  {
+   "range": "85~89",
+   "n": 95
+  },
+  {
+   "range": "90~100",
+   "n": 5
+  }
+ ],
+ "sweep": [
+  {
+   "param": "stop_pct",
+   "value": 3,
+   "n": 3317,
+   "win_rate": 41.5,
+   "expectancy_r": -0.022,
+   "total_r": -71.3,
+   "max_drawdown_r": -170.4,
+   "profit_factor": 0.95
+  },
+  {
+   "param": "stop_pct",
+   "value": 5,
+   "n": 2772,
+   "win_rate": 45.6,
+   "expectancy_r": 0.019,
+   "total_r": 53.5,
+   "max_drawdown_r": -74.3,
+   "profit_factor": 1.06
+  },
+  {
+   "param": "stop_pct",
+   "value": 7,
+   "n": 2692,
+   "win_rate": 45.9,
+   "expectancy_r": 0.03,
+   "total_r": 81.2,
+   "max_drawdown_r": -50.2,
+   "profit_factor": 1.13
+  },
+  {
+   "param": "stop_pct",
+   "value": 8,
+   "n": 2620,
+   "win_rate": 45.8,
+   "expectancy_r": 0.028,
+   "total_r": 74.6,
+   "max_drawdown_r": -46.7,
+   "profit_factor": 1.14
+  },
+  {
+   "param": "trail_mode",
+   "value": "ma5",
+   "n": 4723,
+   "win_rate": 46.5,
+   "expectancy_r": 0.01,
+   "total_r": 46.7,
+   "max_drawdown_r": -66.6,
+   "profit_factor": 1.04
+  },
+  {
+   "param": "trail_mode",
+   "value": "ma10",
+   "n": 3737,
+   "win_rate": 45.4,
+   "expectancy_r": 0.02,
+   "total_r": 75.9,
+   "max_drawdown_r": -60.6,
+   "profit_factor": 1.07
+  },
+  {
+   "param": "trail_mode",
+   "value": "ma20",
+   "n": 2772,
+   "win_rate": 45.6,
+   "expectancy_r": 0.019,
+   "total_r": 53.5,
+   "max_drawdown_r": -74.3,
+   "profit_factor": 1.06
+  },
+  {
+   "param": "trail_mode",
+   "value": "atr",
+   "n": 3261,
+   "win_rate": 45.7,
+   "expectancy_r": 0.02,
+   "total_r": 66.8,
+   "max_drawdown_r": -72.2,
+   "profit_factor": 1.07
+  },
+  {
+   "param": "trail_mode",
+   "value": "pct",
+   "n": 4984,
+   "win_rate": 47.4,
+   "expectancy_r": 0.01,
+   "total_r": 48.0,
+   "max_drawdown_r": -61.7,
+   "profit_factor": 1.04
+  },
+  {
+   "param": "trail_param",
+   "value": 1.5,
+   "n": 2772,
+   "win_rate": 45.6,
+   "expectancy_r": 0.019,
+   "total_r": 53.5,
+   "max_drawdown_r": -74.3,
+   "profit_factor": 1.06
+  },
+  {
+   "param": "trail_param",
+   "value": 2.0,
+   "n": 2772,
+   "win_rate": 45.6,
+   "expectancy_r": 0.019,
+   "total_r": 53.5,
+   "max_drawdown_r": -74.3,
+   "profit_factor": 1.06
+  },
+  {
+   "param": "trail_param",
+   "value": 2.5,
+   "n": 2772,
+   "win_rate": 45.6,
+   "expectancy_r": 0.019,
+   "total_r": 53.5,
+   "max_drawdown_r": -74.3,
+   "profit_factor": 1.06
+  },
+  {
+   "param": "trail_param",
+   "value": 3.0,
+   "n": 2772,
+   "win_rate": 45.6,
+   "expectancy_r": 0.019,
+   "total_r": 53.5,
+   "max_drawdown_r": -74.3,
+   "profit_factor": 1.06
+  },
+  {
+   "param": "first_target_r",
+   "value": 1.5,
+   "n": 2825,
+   "win_rate": 46.2,
+   "expectancy_r": 0.021,
+   "total_r": 58.0,
+   "max_drawdown_r": -67.6,
+   "profit_factor": 1.07
+  },
+  {
+   "param": "first_target_r",
+   "value": 2.0,
+   "n": 2772,
+   "win_rate": 45.6,
+   "expectancy_r": 0.019,
+   "total_r": 53.5,
+   "max_drawdown_r": -74.3,
+   "profit_factor": 1.06
+  },
+  {
+   "param": "first_target_r",
+   "value": 3.0,
+   "n": 2753,
+   "win_rate": 44.9,
+   "expectancy_r": 0.03,
+   "total_r": 83.6,
+   "max_drawdown_r": -63.7,
+   "profit_factor": 1.1
+  },
+  {
+   "param": "max_open",
+   "value": 4,
+   "n": 1578,
+   "win_rate": 44.9,
+   "expectancy_r": 0.019,
+   "total_r": 30.0,
+   "max_drawdown_r": -34.0,
+   "profit_factor": 1.06
+  },
+  {
+   "param": "max_open",
+   "value": 8,
+   "n": 2772,
+   "win_rate": 45.6,
+   "expectancy_r": 0.019,
+   "total_r": 53.5,
+   "max_drawdown_r": -74.3,
+   "profit_factor": 1.06
+  },
+  {
+   "param": "max_open",
+   "value": 12,
+   "n": 3720,
+   "win_rate": 45.2,
+   "expectancy_r": 0.035,
+   "total_r": 131.2,
+   "max_drawdown_r": -59.3,
+   "profit_factor": 1.12
+  }
+ ],
+ "survivorship_bias": true,
+ "quick": false
+}
