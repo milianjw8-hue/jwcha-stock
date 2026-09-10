@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>스플릿 보드 — VOO · QQQ · SCHD · USD</title>
+<meta name="theme-color" content="#0A1A22">
+<style>
+:root{--ink:#0A1A22;--panel:#102A35;--panel2:#163844;--line:#26505F;
+--text:#E6F0F2;--dim:#8FAEB8;--acc:#2ED47A;--warn:#F2B33D;--red:#FF4D5E}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--ink);color:var(--text);
+font-family:system-ui,-apple-system,'Apple SD Gothic Neo',sans-serif;
+font-size:15px;line-height:1.5;padding:14px 14px 60px}
+h1{font-size:18px;margin:0 0 2px;letter-spacing:-.02em}
+.sub{font-size:11.5px;color:var(--dim);margin:0 0 14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+padding:13px;margin-bottom:12px}
+.hd{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.hd b{font-size:16px}
+.px{font-family:ui-monospace,monospace;font-weight:700}
+.chg{font-size:12px;font-family:ui-monospace,monospace}
+.badge{font-size:10.5px;padding:2px 8px;border-radius:99px;margin-left:auto}
+.b-ok{background:var(--panel2);color:var(--dim)}
+.b-bear{background:var(--red);color:var(--ink);font-weight:700}
+.sig{font-size:12.5px;margin:7px 0 0;padding:7px 10px;border-radius:9px;background:var(--panel2)}
+.sig.buy{background:var(--acc);color:var(--ink);font-weight:700}
+.lv{display:flex;gap:5px;margin-top:10px}
+.lv div{flex:1;text-align:center;font-family:ui-monospace,monospace;font-size:10.5px;
+padding:6px 1px;border-radius:7px;background:var(--panel2);color:var(--dim)}
+.lv div.hit{background:var(--warn);color:var(--ink);font-weight:700}
+.lv div.held{outline:2px solid var(--acc)}
+.lv span{display:block;font-size:9px;opacity:.75}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12.5px}
+th{color:var(--dim);font-weight:500;text-align:left;font-size:11px;padding:3px 4px}
+td{padding:5px 4px;border-top:1px solid rgba(38,80,95,.5);font-family:ui-monospace,monospace}
+td.won{color:var(--acc)} td.lose{color:var(--red)}
+.add{display:flex;gap:6px;margin-top:9px}
+.add input,.add select{background:var(--panel2);border:1px solid var(--line);color:var(--text);
+border-radius:8px;padding:8px;font-size:14px;min-width:0}
+.add select{flex:0 0 74px}.add input{flex:1}
+.add button{background:var(--acc);color:var(--ink);border:none;border-radius:8px;
+padding:8px 13px;font-weight:700;font-size:13px}
+.x{background:none;border:none;color:var(--dim);font-size:15px;padding:0 4px}
+.core{font-size:11px;color:var(--dim);margin-top:8px}
+.err{color:var(--warn);font-size:12.5px}
+.foot{font-size:10.5px;color:var(--dim);line-height:1.6;margin-top:16px}
+</style>
+</head>
+<body>
+<h1>스플릿 보드</h1>
+<p class="sub" id="asof">split.json 불러오는 중…</p>
+<div id="root"></div>
+<p class="foot">코어(상시보유)는 이 보드에 기록하지 않는다. 새틀라이트 회차만 기록:
+1~3회차는 목표가 도달 시 매도, 4~6회차는 목표 도달 후 20일선 이탈 시 매도.
+기록은 이 기기에만 저장된다. 투자 자문 아님.</p>
+<script>
+(function(){
+"use strict";
+var mem={};
+var st={get:function(k){try{return localStorage.getItem(k)}catch(e){return mem[k]||null}},
+        set:function(k,v){try{localStorage.setItem(k,v)}catch(e){mem[k]=v}}};
+var KEY="split_ledger_v1";
+function ledger(){try{return JSON.parse(st.get(KEY)||"{}")}catch(e){return{}}}
+function save(l){st.set(KEY,JSON.stringify(l))}
+function esc(s){var d=document.createElement("div");d.textContent=String(s==null?"":s);return d.innerHTML}
+function nf(x,d){return Number(x).toLocaleString("ko-KR",{maximumFractionDigits:d==null?2:d})}
+
+var DATA=null;
+function render(){
+  var root=document.getElementById("root");root.innerHTML="";
+  var led=ledger();
+  DATA.assets.forEach(function(a){
+    var rows=led[a.symbol]||[];
+    var heldK={};rows.forEach(function(r){heldK[r.k]=1});
+    var card=document.createElement("div");card.className="card";
+    var h='<div class="hd"><b>'+esc(a.label)+'</b>'+
+      '<span class="px">'+nf(a.close,a.close<100?2:2)+'</span>'+
+      '<span class="chg" style="color:'+(a.chg_pct>=0?"var(--acc)":"var(--red)")+'">'+
+      (a.chg_pct>=0?"+":"")+esc(a.chg_pct)+'%</span>'+
+      '<span class="badge '+(a.below_ma200?"b-bear":"b-ok")+'">'+
+      (a.below_ma200?"⚠ 200일선 아래 · 간격확대":"정상 국면")+'</span></div>';
+    var sig = a.buy_signal
+      ? '<div class="sig buy">🟢 '+a.active_k+'회차 매수 신호 — 레벨 도달 + 반등일</div>'
+      : (a.active_k>=1
+        ? '<div class="sig">🟡 '+a.active_k+'회차 구간 — 양전 마감 대기</div>'
+        : '<div class="sig">레벨 미도달 (1회차: '+nf(a.levels[0].price)+')</div>');
+    var lv='<div class="lv">'+a.levels.map(function(l){
+      return '<div class="'+(l.reached?"hit ":"")+(heldK[l.k]?"held":"")+'">'+
+        '<span>'+l.k+'회차</span>'+nf(l.price,a.close<100?2:0)+'</div>';
+    }).join("")+'</div>';
+    var tbl="";
+    if(rows.length){
+      tbl='<table><tr><th>회차</th><th>매수가</th><th>목표가</th><th>현재손익</th><th></th></tr>'+
+        rows.map(function(r,i){
+          var tgt=r.buy*(1+a.target_pct);
+          var pl=(a.close/r.buy-1)*100;
+          var done=a.close>=tgt;
+          var note=(r.k>=4&&done)?"↩20일선 추적":(done?"✓ 목표도달":nf(tgt));
+          return '<tr><td>'+r.k+'</td><td>'+nf(r.buy)+'</td><td>'+note+'</td>'+
+            '<td class="'+(pl>=0?"won":"lose")+'">'+(pl>=0?"+":"")+pl.toFixed(1)+'%</td>'+
+            '<td><button class="x" data-s="'+esc(a.symbol)+'" data-i="'+i+'">×</button></td></tr>';
+        }).join("")+'</table>';
+    }
+    var opts="";for(var k=1;k<=DATA.n_tranches;k++)
+      if(!heldK[k])opts+='<option value="'+k+'">'+k+'회차</option>';
+    var add=opts?'<div class="add"><select data-s="'+esc(a.symbol)+'">'+opts+'</select>'+
+      '<input type="number" inputmode="decimal" placeholder="매수가" data-s="'+esc(a.symbol)+'">'+
+      '<button data-s="'+esc(a.symbol)+'">기록</button></div>':"";
+    card.innerHTML=h+sig+lv+tbl+add+
+      '<div class="core">코어 '+(a.core_frac*100)+'% 상시보유 · 간격 '+
+      (a.gap_effective*100).toFixed(1)+'% · 회차 익절 +'+(a.target_pct*100).toFixed(1)+'%</div>';
+    root.appendChild(card);
+  });
+  root.querySelectorAll("button.x").forEach(function(b){
+    b.addEventListener("click",function(){
+      var l=ledger();l[b.dataset.s].splice(+b.dataset.i,1);save(l);render();
+    });
+  });
+  root.querySelectorAll(".add button").forEach(function(b){
+    b.addEventListener("click",function(){
+      var s=b.dataset.s;
+      var sel=root.querySelector('.add select[data-s="'+s.replace(/"/g,'\\"')+'"]');
+      var inp=root.querySelector('.add input[data-s="'+s.replace(/"/g,'\\"')+'"]');
+      var px=parseFloat(inp.value);
+      if(!(px>0)){inp.focus();return}
+      var l=ledger();(l[s]=l[s]||[]).push({k:+sel.value,buy:px,d:new Date().toISOString().slice(0,10)});
+      l[s].sort(function(a,b){return a.k-b.k});save(l);render();
+    });
+  });
+}
+fetch("split.json",{cache:"no-cache"}).then(function(r){
+  if(!r.ok)throw 0;return r.json();
+}).then(function(d){
+  DATA=d;document.getElementById("asof").textContent="기준: "+d.asof;render();
+}).catch(function(){
+  document.getElementById("asof").innerHTML=
+    '<span class="err">split.json 없음 — Actions의 Split Levels 워크플로우 첫 실행 후 표시됩니다.</span>';
+});
+})();
+</script>
+</body>
+</html>
