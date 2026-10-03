@@ -1,5 +1,5 @@
 {
- "asof": "2026-10-02 01:04 KST",
+ "asof": "2026-10-03 00:43 KST",
  "n_tranches": 6,
  "pyramid": [
   1.0,
@@ -13,15 +13,15 @@
   {
    "symbol": "VOO",
    "label": "VOO",
-   "close": 700.86,
-   "chg_pct": -0.23,
+   "close": 702.35,
+   "chg_pct": 0.21,
    "anchor": 713.1163,
    "anchor_type": "high",
-   "ma20": 702.2507,
-   "ma200": 658.0858,
+   "ma20": 702.2879,
+   "ma200": 658.4989,
    "below_ma200": false,
    "gap_effective": 0.035,
-   "up_day": false,
+   "up_day": true,
    "active_k": 0,
    "buy_signal": false,
    "target_pct": 0.045,
@@ -68,12 +68,12 @@
   {
    "symbol": "QQQ",
    "label": "QQQ",
-   "close": 739.77,
-   "chg_pct": 0.25,
+   "close": 742.03,
+   "chg_pct": 0.31,
    "anchor": 747.46,
    "anchor_type": "high",
-   "ma20": 724.0989,
-   "ma200": 665.8685,
+   "ma20": 725.7753,
+   "ma200": 666.5249,
    "below_ma200": false,
    "gap_effective": 0.05,
    "up_day": true,
@@ -123,17 +123,17 @@
   {
    "symbol": "SCHD",
    "label": "SCHD",
-   "close": 32.53,
-   "chg_pct": -0.97,
+   "close": 32.66,
+   "chg_pct": 0.4,
    "anchor": 34.9314,
    "anchor_type": "high",
-   "ma20": 33.6615,
-   "ma200": 31.1828,
+   "ma20": 33.5578,
+   "ma200": 31.2111,
    "below_ma200": false,
    "gap_effective": 0.028,
-   "up_day": false,
+   "up_day": true,
    "active_k": 2,
-   "buy_signal": false,
+   "buy_signal": true,
    "target_pct": 0.035,
    "core_frac": 0.6,
    "levels": [
@@ -178,15 +178,15 @@
   {
    "symbol": "KRW=X",
    "label": "USD/KRW",
-   "close": 1363.38,
-   "chg_pct": 0.48,
-   "anchor": 1359.0701,
+   "close": 1342.51,
+   "chg_pct": -1.06,
+   "anchor": 1359.0536,
    "anchor_type": "mean",
-   "ma20": 1357.434,
-   "ma200": 1459.1537,
+   "ma20": 1356.3905,
+   "ma200": 1459.0493,
    "below_ma200": true,
    "gap_effective": 0.018,
-   "up_day": true,
+   "up_day": false,
    "active_k": 0,
    "buy_signal": false,
    "target_pct": 0.015,
@@ -194,37 +194,37 @@
    "levels": [
     {
      "k": 1,
-     "price": 1334.6069,
+     "price": 1334.5906,
      "reached": false,
      "weight": 1.0
     },
     {
      "k": 2,
-     "price": 1310.1436,
+     "price": 1310.1276,
      "reached": false,
      "weight": 1.1
     },
     {
      "k": 3,
-     "price": 1285.6803,
+     "price": 1285.6647,
      "reached": false,
      "weight": 1.2
     },
     {
      "k": 4,
-     "price": 1261.2171,
+     "price": 1261.2017,
      "reached": false,
      "weight": 1.3
     },
     {
      "k": 5,
-     "price": 1236.7538,
+     "price": 1236.7387,
      "reached": false,
      "weight": 1.45
     },
     {
      "k": 6,
-     "price": 1212.2906,
+     "price": 1212.2758,
      "reached": false,
      "weight": 1.6
     }
