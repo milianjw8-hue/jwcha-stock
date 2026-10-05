@@ -12,7 +12,8 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 
-ROOT = Path(__file__).resolve().parent
+SCRIPT_DIR = Path(__file__).resolve().parent
+ROOT = SCRIPT_DIR.parent if SCRIPT_DIR.name == "scripts" else SCRIPT_DIR
 OUTPUTS = (ROOT / "weekly-data.json", ROOT / "docs" / "weekly-data.json")
 TICKERS = {"nasdaq": "%5EIXIC", "nyse": "%5ENYA"}
 HOSTS = ("query2.finance.yahoo.com", "query1.finance.yahoo.com")
