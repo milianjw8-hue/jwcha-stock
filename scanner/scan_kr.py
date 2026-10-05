@@ -27,9 +27,11 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from telegram_push import send_telegram
 from enrich import enrich, summarize
 import holdings as H
+from wedges import detect_wedge
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT_PATH = os.path.join(ROOT, "docs", "results.json")
+WEDGES_OUT_PATH = os.path.join(ROOT, "docs", "wedges_kr.json")
 
 TOP_BY_VALUE = 150        # 당일 거래대금 상위 N종목만 정밀 스캔
 MIN_PRICE = 2000          # 동전주 제외
@@ -133,6 +135,7 @@ def scan(date: str) -> list[dict]:
 
     frm = (dt.datetime.strptime(date, "%Y%m%d") - dt.timedelta(days=400)).strftime("%Y%m%d")
     candidates = []
+    wedges = []
     frames: dict[str, "object"] = {}
     for ticker in top.index:
         try:
@@ -143,6 +146,10 @@ def scan(date: str) -> list[dict]:
         time.sleep(0.15)  # KRX 서버 부하 방지
         if len(df) < 120:  # 신규 상장 제외 (최소 약 6개월)
             continue
+        wedge = detect_wedge(df.rename(columns={"고가": "high", "저가": "low", "종가": "close", "거래량": "volume"}))
+        if wedge:
+            wedge.update({"ticker": str(ticker), "name": stock.get_market_ticker_name(ticker), "market": "kr"})
+            wedges.append(wedge)
         close, high, vol = df["종가"], df["고가"], df["거래량"]
         c = float(close.iloc[-1])
         hi52 = float(high.iloc[-252:].max())
@@ -169,7 +176,8 @@ def scan(date: str) -> list[dict]:
         frames[ticker] = df
 
     candidates.sort(key=lambda r: (not r["breakout"], -r["vol_vs_20d"]))
-    return candidates[:MAX_CANDIDATES], frames, set(top.index)
+    wedges.sort(key=lambda r: (r["phase"] == "이탈 확인", r["volume_dryup"], r["score"]), reverse=True)
+    return candidates[:MAX_CANDIDATES], frames, set(top.index), wedges[:30]
 
 
 def main():
@@ -178,7 +186,7 @@ def main():
     date = latest_trading_day()
     print(f"기준일: {date}")
     market_ok = market_filter(date)
-    cands, frames, top_today = scan(date)
+    cands, frames, top_today, wedge_candidates = scan(date)
 
     # 보유 종목은 스캔을 통과하지 못해도 앱이 현재가·패턴 경보를 띄울 수 있어야 한다.
     held, held_frames = H.fetch_kr(H.held_tickers("kr"), date,
@@ -211,7 +219,15 @@ def main():
     os.makedirs(os.path.dirname(OUT_PATH), exist_ok=True)
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=1)
-    print(f"저장: {OUT_PATH} — 후보 {len(result['candidates'])}종목")
+    wedge_result = {
+        "asof": result["asof"], "market_ok": market_ok,
+        "universe_count": len(top_today),
+        "scope": "KRX 거래대금 상위 150종목 · 2,000원 이상 · 120거래일 이상",
+        "candidates": wedge_candidates,
+    }
+    with open(WEDGES_OUT_PATH, "w", encoding="utf-8") as f:
+        json.dump(wedge_result, f, ensure_ascii=False, indent=1)
+    print(f"저장: {OUT_PATH} — 후보 {len(result['candidates'])}종목; 쐐기 {len(wedge_candidates)}종목")
 
     lines = [f"📊 <b>국장 스캔</b> {result['asof']}",
              f"시장필터: {'✅ 통과' if result['market_ok'] else '⚠️ 미통과 — 현금 우선'}"]
