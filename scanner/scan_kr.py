@@ -239,6 +239,10 @@ def main():
             lines.append(f"    └ {badge}")
     if not result["candidates"]:
         lines.append("후보 없음")
+    if wedge_candidates:
+        lines.append("\\n<b>쐐기 패턴 감시</b>")
+        for w in wedge_candidates[:5]:
+            lines.append(f"{w['pattern']} {w['name']} · {w['phase']} · 거래량x{w['volume_vs_20d']}")
     warn = H.summarize(held)
     if warn:
         lines.append("\n<b>보유 종목 점검</b>")
