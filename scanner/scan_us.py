@@ -29,9 +29,11 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from telegram_push import send_telegram
 from enrich import enrich, summarize
 import holdings as H
+from wedges import detect_wedge
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT_PATH = os.path.join(ROOT, "docs", "results_us.json")
+WEDGES_OUT_PATH = os.path.join(ROOT, "docs", "wedges_us.json")
 FALLBACK_UNIVERSE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "universe_us.txt")
 
 MIN_DOLLAR_VOL = 20e6   # 20일 평균 거래대금 $20M 이상
@@ -96,12 +98,19 @@ def scan(market_ok: bool) -> dict:
                        progress=False, auto_adjust=True, threads=True)
 
     rows = []
+    wedges = []
     frames: dict[str, pd.DataFrame] = {}
     for t in universe:
         try:
             df = data[t].dropna()
         except KeyError:
             continue
+        if len(df) < 60:
+            continue
+        wedge = detect_wedge(df.rename(columns={"High": "high", "Low": "low", "Close": "close", "Volume": "volume"}))
+        if wedge:
+            wedge.update({"ticker": t, "name": t, "market": "us"})
+            wedges.append(wedge)
         if len(df) < 260:
             continue
         close, high, vol = df["Close"], df["High"], df["Volume"]
@@ -164,7 +173,8 @@ def scan(market_ok: bool) -> dict:
     if df.empty:
         held, held_frames = H.fetch_us(held_tickers, set(), held_have)
         enrich(held, held_frames, "us", market_ok)
-        return {"candidates": [], "holdings": held}
+        wedges.sort(key=lambda r: (r["phase"] == "이탈 확인", r["volume_dryup"], r["score"]), reverse=True)
+        return {"candidates": [], "holdings": held, "wedges": wedges[:30], "wedge_universe_count": len(universe)}
     df["rs_pctile"] = df["wret"].rank(pct=True) * 100
     df = df[df["rs_pctile"] >= MIN_RS_PCTILE]
     order = {"breakout": 0, "pivot_near": 1, "base": 2, "extended": 3}
@@ -194,19 +204,29 @@ def scan(market_ok: bool) -> dict:
     # 같은 리스트 객체를 수정하므로 enrich 후에도 cands 와 held 는 그대로 갈라져 있다
     enrich(cands + held, frames, "us", market_ok, extra)
     # 지표 계산에 실패한 보유 종목은 차트 파일도 없다 — 앱에 빈 카드를 남기지 않는다
-    return {"candidates": cands, "holdings": [c for c in held if "metrics" in c]}
+    wedges.sort(key=lambda r: (r["phase"] == "이탈 확인", r["volume_dryup"], r["score"]), reverse=True)
+    return {"candidates": cands, "holdings": [c for c in held if "metrics" in c],
+            "wedges": wedges[:30], "wedge_universe_count": len(universe)}
 
 
 def main():
     now_kst = dt.datetime.now(ZoneInfo("Asia/Seoul"))
     market_ok = market_filter()
     result = {"asof": now_kst.strftime("%Y-%m-%d %H:%M KST"), "market_ok": market_ok}
-    result.update(scan(market_ok))
+    scan_result = scan(market_ok)
+    wedge_candidates = scan_result.pop("wedges", [])
+    wedge_universe_count = scan_result.pop("wedge_universe_count", 0)
+    result.update(scan_result)
 
     os.makedirs(os.path.dirname(OUT_PATH), exist_ok=True)
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=1)
-    print(f"저장: {OUT_PATH} — 후보 {len(result['candidates'])}종목")
+    with open(WEDGES_OUT_PATH, "w", encoding="utf-8") as f:
+        json.dump({"asof": result["asof"], "market_ok": market_ok,
+                   "universe_count": wedge_universe_count,
+                   "scope": "S&P 500 + Nasdaq-100 유니버스 · 60거래일 이상",
+                   "candidates": wedge_candidates}, f, ensure_ascii=False, indent=1)
+    print(f"저장: {OUT_PATH} — 후보 {len(result['candidates'])}종목; 쐐기 {len(wedge_candidates)}종목")
 
     icon = {"breakout": "🔥", "pivot_near": "🎯", "base": "🧱", "extended": "↗"}
     lines = [f"📈 <b>미장 스캔</b> {result['asof']}",
@@ -219,6 +239,10 @@ def main():
             lines.append(f"    └ {badge}")
     if not result["candidates"]:
         lines.append("후보 없음")
+    if wedge_candidates:
+        lines.append("\\n<b>쐐기 패턴 감시</b>")
+        for w in wedge_candidates[:5]:
+            lines.append(f"{w['pattern']} {w['ticker']} · {w['phase']} · 거래량x{w['volume_vs_20d']}")
     warn = H.summarize(result.get("holdings") or [])
     if warn:
         lines.append("\n<b>보유 종목 점검</b>")
