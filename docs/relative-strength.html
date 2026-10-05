@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10251f">
+  <meta name="description" content="나스닥 종합지수와 NYSE 종합지수의 상대강도 비율 및 10주 이동평균을 계산합니다.">
+  <title>나스닥·NYSE 상대강도 계산기</title>
+  <style>
+    :root{color-scheme:light;--ink:#17231f;--muted:#64736d;--line:#dbe4df;--paper:#f4f7f5;--green:#17694d;--green-soft:#e5f4ec;--red:#a83e36;--red-soft:#fff0ed;--gold:#f1bd61;--card:#fff;--navy:#10251f}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.5}
+    .top{background:var(--navy);color:#fff;padding:24px 18px 28px}.wrap{width:min(920px,100% - 28px);margin:auto}.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#b8d4c7;font-weight:700}.top h1{font-size:clamp(25px,6vw,38px);line-height:1.15;margin:8px 0}.top p{margin:8px 0 0;color:#d4e1db;font-size:14px}
+    main{padding:18px 0 40px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin:0 0 14px;box-shadow:0 5px 20px #173b2d0a}.card h2{font-size:18px;margin:0 0 6px}.sub{font-size:13px;color:var(--muted);margin:0 0 14px}.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:0;border-radius:11px;background:var(--green);color:#fff;font:inherit;font-weight:700;font-size:14px;padding:11px 14px;min-height:44px;cursor:pointer}.btn.secondary{background:#edf2ef;color:#25372f;border:1px solid var(--line)}.btn:active{transform:translateY(1px)}
+    .result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.metric{padding:14px;background:#f6f9f7;border:1px solid var(--line);border-radius:14px;min-width:0}.metric .label{font-size:12px;color:var(--muted)}.metric strong{display:block;font-size:clamp(20px,5vw,29px);font-variant-numeric:tabular-nums;letter-spacing:-.03em;margin-top:4px;overflow-wrap:anywhere}.signal{margin-top:12px;padding:14px;border-radius:13px;background:#f1f4f2;border:1px solid var(--line);font-weight:700}.signal.up{background:var(--green-soft);color:#15583e;border-color:#b9dfc9}.signal.down{background:var(--red-soft);color:#8f3029;border-color:#f2c7c1}.signal.neutral{color:#46534d}.signal small{display:block;font-weight:500;margin-top:4px;color:inherit}
+    .table-wrap{overflow-x:auto;margin:0 -4px}table{width:100%;border-collapse:collapse;min-width:480px}th,td{text-align:left;padding:8px 5px;border-bottom:1px solid #edf1ee;font-size:13px}th{color:var(--muted);font-weight:650;font-size:12px}td:first-child{width:35px;color:#87948e}input{width:100%;border:1px solid #d8e1dc;border-radius:8px;padding:9px 8px;min-height:40px;font:inherit;font-size:14px;color:var(--ink);background:white}input:focus,textarea:focus{outline:2px solid #86c5a6;border-color:transparent}.input-date{min-width:114px}.input-num{min-width:116px;font-variant-numeric:tabular-nums}.foot{font-size:12px;color:var(--muted);margin:10px 0 0}.chart{width:100%;height:170px;display:block;background:#fbfcfb;border:1px solid var(--line);border-radius:12px}.legend{font-size:12px;color:var(--muted);display:flex;gap:16px;margin:8px 2px 0}.key:before{content:"";display:inline-block;width:10px;height:3px;background:var(--green);vertical-align:middle;margin-right:6px}.key.avg:before{background:var(--gold)}details summary{cursor:pointer;font-weight:700}textarea{width:100%;min-height:112px;padding:10px;border:1px solid var(--line);border-radius:10px;font:13px ui-monospace,monospace;resize:vertical}.hint{font-size:12px;color:var(--muted);margin:7px 0}.formula{background:#f6f9f7;border-radius:12px;padding:12px;font-size:14px}.formula b{color:var(--green)}.notice{font-size:12px;color:var(--muted);padding:0 3px}.error{color:var(--red);font-size:13px;min-height:20px;margin:8px 0 0}
+    @media(max-width:560px){.wrap{width:min(100% - 20px,920px)}.top{padding:20px 14px 24px}.card{padding:15px;border-radius:15px}.result-grid{grid-template-columns:1fr 1fr}.metric:last-child{grid-column:1/-1}.actions .btn{flex:1}.top p{font-size:13px}}
+  </style>
+</head>
+<body>
+  <header class="top"><div class="wrap"><div class="eyebrow">MARKET BREADTH · WEEKLY</div><h1>나스닥 · NYSE<br>상대강도 계산기</h1><p>주간 종가를 입력하면 상대강도 비율과 10주 이동평균을 계산해 책의 방식으로 판정합니다.</p></div></header>
+  <main class="wrap">
+    <section class="card" aria-live="polite">
+      <h2>현재 판정</h2><p class="sub">가장 위의 행이 최신 주입니다. 최근 10주의 비율 평균과 비교합니다.</p>
+      <div class="result-grid">
+        <div class="metric"><span class="label">최신 상대강도 비율</span><strong id="ratioNow">—</strong></div>
+        <div class="metric"><span class="label">10주 이동평균</span><strong id="average">—</strong></div>
+        <div class="metric"><span class="label">이동평균 대비</span><strong id="difference">—</strong></div>
+      </div>
+      <div id="signal" class="signal neutral">주간 종가 10개를 입력해 주세요.<small>비율 = 나스닥 종합지수 ÷ NYSE 종합지수</small></div>
+    </section>
+
+    <section class="card">
+      <h2>최근 10주 종가 입력</h2><p class="sub">각 주의 금요일 종가를 입력하세요. 휴장일이면 그 주의 마지막 거래일 종가를 사용합니다.</p>
+      <div class="actions" style="margin-bottom:10px"><button class="btn" id="sample">예시 값 불러오기</button><button class="btn secondary" id="clear">모두 지우기</button></div>
+      <div class="table-wrap"><table><thead><tr><th>#</th><th>주간 기준일</th><th>나스닥 종합지수</th><th>NYSE 종합지수</th></tr></thead><tbody id="rows"></tbody></table></div>
+      <p class="foot">입력값은 이 브라우저에만 저장됩니다. 최신 주를 1번 행에 입력하고, 오래된 주는 아래 행에 입력하세요.</p>
+      <p id="error" class="error" role="status"></p>
+      <details style="margin-top:12px"><summary>표에서 복사한 데이터 붙여넣기</summary><p class="hint">날짜, 나스닥 종가, NYSE 종가 순서로 한 줄에 하나씩 붙여넣으세요. 쉼표 또는 탭으로 구분합니다. 최신 주부터 입력합니다.</p><textarea id="paste" placeholder="2026-10-02,27190.86,23654.31&#10;2026-09-25,27068.72,23912.59"></textarea><div class="actions" style="margin-top:8px"><button class="btn secondary" id="applyPaste">붙여넣은 값 적용</button></div></details>
+    </section>
+
+    <section class="card"><h2>최근 비율 흐름</h2><p class="sub">최신 주가 오른쪽에 표시됩니다.</p><svg id="chart" class="chart" viewBox="0 0 600 170" role="img" aria-label="상대강도 비율과 10주 평균 그래프"></svg><div class="legend"><span class="key">주간 상대강도</span><span class="key avg">10주 평균</span></div></section>
+
+    <section class="card"><h2>판정 방법</h2><div class="formula"><b>주간 비율</b> = 나스닥 종합지수 ÷ NYSE 종합지수<br><b>10주 평균</b> = 최근 10개 주간 비율의 합 ÷ 10<br><br>최신 비율이 평균보다 높으면 <b>나스닥 우세</b>, 낮으면 <b>NYSE 우세</b>로 표시합니다.</div></section>
+    <p class="notice">이 계산기는 시장 흐름을 살펴보는 참고 도구입니다. 매매 신호나 수익을 보장하지 않으며, 투자 결정은 본인의 판단과 책임으로 해주세요.</p>
+  </main>
+  <script>
+    const STORAGE_KEY = 'jwcha-relative-strength-v1';
+    const SAMPLE = [
+      ['2026-10-02','27190.86','23654.31'],['2026-09-25','27068.72','23912.59'],['2026-09-18','26522.54','23998.76'],['2026-09-11','26333.04','24331.56'],['2026-09-04','26506.99','24639.25'],['2026-08-28','26402.42','24565.52'],['2026-08-21','26180.45','24728.67'],['2026-08-14','26729.16','24821.68'],['2026-08-07','26690.62','24595.24'],['2026-07-31','25373.85','24107.55']
+    ];
+    const rowsEl=document.getElementById('rows');
+    function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+    function buildRows(values=[]){rowsEl.innerHTML='';for(let i=0;i<10;i++){const v=values[i]||['','',''];const tr=document.createElement('tr');tr.innerHTML=`<td>${i+1}</td><td><input class="input-date" type="date" aria-label="${i+1}주 전 날짜" value="${esc(v[0]||'')}"></td><td><input class="input-num nasdaq" type="text" inputmode="decimal" autocomplete="off" aria-label="${i+1}주 전 나스닥 종가" placeholder="예: 27190.86" value="${esc(v[1]||'')}"></td><td><input class="input-num nyse" type="text" inputmode="decimal" autocomplete="off" aria-label="${i+1}주 전 NYSE 종가" placeholder="예: 23654.31" value="${esc(v[2]||'')}"></td>`;rowsEl.appendChild(tr)}rowsEl.querySelectorAll('input').forEach(el=>el.addEventListener('input',calculate));calculate()}
+    function number(s){return Number(String(s||'').replace(/[,$\s]/g,''))}
+    function getData(){return [...rowsEl.querySelectorAll('tr')].map(tr=>({date:tr.children[1].querySelector('input').value,n:number(tr.querySelector('.nasdaq').value),y:number(tr.querySelector('.nyse').value)}))}
+    function fmt(n){return Number.isFinite(n)?n.toFixed(4):'—'}
+    function calculate(){const d=getData();localStorage.setItem(STORAGE_KEY,JSON.stringify(d.map(x=>[x.date,rowsEl.querySelectorAll('tr')[d.indexOf(x)].querySelector('.nasdaq').value,rowsEl.querySelectorAll('tr')[d.indexOf(x)].querySelector('.nyse').value])));const complete=d.filter(x=>x.n>0&&x.y>0);const err=document.getElementById('error');err.textContent=complete.length&&complete.length<10?`유효한 주간 종가가 ${complete.length}개입니다. 이동평균 판정에는 10개가 필요합니다.`:'';const current=d[0].n>0&&d[0].y>0?d[0].n/d[0].y:NaN;const ratios=d.map(x=>x.n>0&&x.y>0?x.n/x.y:NaN);const avg=ratios.every(Number.isFinite)?ratios.reduce((a,b)=>a+b,0)/10:NaN;document.getElementById('ratioNow').textContent=fmt(current);document.getElementById('average').textContent=fmt(avg);const diff=document.getElementById('difference');const signal=document.getElementById('signal');if(Number.isFinite(current)&&Number.isFinite(avg)){const pct=(current/avg-1)*100;diff.textContent=`${pct>=0?'+':''}${pct.toFixed(2)}%`;if(current>avg){signal.className='signal up';signal.innerHTML='나스닥 우세<small>최신 비율이 10주 평균보다 높습니다. 책의 판정 기준상 나스닥이 NYSE를 주도합니다.</small>'}else if(current<avg){signal.className='signal down';signal.innerHTML='NYSE 우세<small>최신 비율이 10주 평균보다 낮습니다. 책의 판정 기준상 나스닥이 뒤처집니다.</small>'}else{signal.className='signal neutral';signal.innerHTML='중립<small>최신 비율이 10주 평균과 같습니다.</small>'}}else{diff.textContent='—';signal.className='signal neutral';signal.innerHTML='주간 종가 10개를 입력해 주세요.<small>비율 = 나스닥 종합지수 ÷ NYSE 종합지수</small>'}drawChart(ratios,avg)}
+    function drawChart(ratios,avg){const svg=document.getElementById('chart');const pts=ratios.filter(Number.isFinite);if(!pts.length){svg.innerHTML='<text x="300" y="90" text-anchor="middle" fill="#64736d" font-size="14">주간 데이터를 입력하면 그래프가 표시됩니다</text>';return}const min=Math.min(...pts,Number.isFinite(avg)?avg:Infinity),max=Math.max(...pts,Number.isFinite(avg)?avg:-Infinity),pad=(max-min||.02)*.16,lo=min-pad,hi=max+pad;const x=i=>34+i*532/Math.max(pts.length-1,1),y=v=>145-(v-lo)/(hi-lo)*120;const line=pts.map((v,i)=>`${i?'L':'M'}${x(i)},${y(v)}`).join(' ');let out=`<line x1="34" y1="145" x2="566" y2="145" stroke="#dbe4df"/><path d="${line}" fill="none" stroke="#17694d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;if(Number.isFinite(avg)){out+=`<line x1="34" y1="${y(avg)}" x2="566" y2="${y(avg)}" stroke="#f1bd61" stroke-width="2" stroke-dasharray="6 5"/><text x="560" y="${y(avg)-5}" text-anchor="end" fill="#98712c" font-size="11">10주 평균</text>`}pts.forEach((v,i)=>{out+=`<circle cx="${x(i)}" cy="${y(v)}" r="${i===pts.length-1?5:3}" fill="#17694d"/>`});out+='<text x="34" y="163" fill="#7a8982" font-size="10">과거 주</text><text x="566" y="163" text-anchor="end" fill="#7a8982" font-size="10">최신 주</text>';svg.innerHTML=out}
+    document.getElementById('sample').addEventListener('click',()=>buildRows(SAMPLE));document.getElementById('clear').addEventListener('click',()=>{localStorage.removeItem(STORAGE_KEY);buildRows()});document.getElementById('applyPaste').addEventListener('click',()=>{const lines=document.getElementById('paste').value.trim().split(/\r?\n/).filter(Boolean);const parsed=[];for(const line of lines){const cells=line.split(/[\t,; ]+/).map(s=>s.trim());if(cells.length<3)continue;const date=/^\d{4}-\d{1,2}-\d{1,2}$/.test(cells[0])?cells[0]:'';const nums=cells.slice(date?1:0).map(number).filter(Number.isFinite);if(nums.length>=2)parsed.push([date,String(nums[0]),String(nums[1])])}if(!parsed.length){document.getElementById('error').textContent='붙여넣은 형식을 읽지 못했습니다. 날짜, 나스닥, NYSE 순서인지 확인해 주세요.';return}buildRows(parsed.slice(0,10));document.getElementById('error').textContent=parsed.length<10?`${parsed.length}개 행을 적용했습니다. 10개를 채워야 이동평균을 판정할 수 있습니다.`:''});
+    try{const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');if(Array.isArray(saved))buildRows(saved);else buildRows()}catch{buildRows()}
+  </script>
+</body>
+</html>
