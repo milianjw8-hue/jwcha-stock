@@ -1,5 +1,5 @@
 {
- "asof": "2026-10-13 11:38 KST",
+ "asof": "2026-10-14 09:24 KST",
  "market_ok": true,
  "universe_count": 130,
  "scope": "S&P 500 + Nasdaq-100 유니버스 · 60거래일 이상",
@@ -71,7 +71,7 @@
    "range_contraction_pct": 82.3,
    "volume_dryup": true,
    "volume_dryup_ratio": 0.61,
-   "volume_vs_20d": 0.92,
+   "volume_vs_20d": 0.93,
    "ticker": "MU",
    "name": "MU",
    "market": "us"
@@ -143,7 +143,7 @@
    "range_contraction_pct": 74.4,
    "volume_dryup": true,
    "volume_dryup_ratio": 0.67,
-   "volume_vs_20d": 0.85,
+   "volume_vs_20d": 0.86,
    "ticker": "SOFI",
    "name": "SOFI",
    "market": "us"
@@ -377,7 +377,7 @@
    "range_contraction_pct": 46.4,
    "volume_dryup": true,
    "volume_dryup_ratio": 0.76,
-   "volume_vs_20d": 0.69,
+   "volume_vs_20d": 0.7,
    "ticker": "ORCL",
    "name": "ORCL",
    "market": "us"
@@ -431,7 +431,7 @@
    "range_contraction_pct": 36.0,
    "volume_dryup": true,
    "volume_dryup_ratio": 0.81,
-   "volume_vs_20d": 0.72,
+   "volume_vs_20d": 0.73,
    "ticker": "GOOGL",
    "name": "GOOGL",
    "market": "us"
@@ -449,7 +449,7 @@
    "range_contraction_pct": 41.0,
    "volume_dryup": true,
    "volume_dryup_ratio": 0.76,
-   "volume_vs_20d": 0.68,
+   "volume_vs_20d": 0.69,
    "ticker": "AAPL",
    "name": "AAPL",
    "market": "us"
@@ -467,7 +467,7 @@
    "range_contraction_pct": 25.8,
    "volume_dryup": true,
    "volume_dryup_ratio": 0.75,
-   "volume_vs_20d": 0.64,
+   "volume_vs_20d": 0.65,
    "ticker": "NVDA",
    "name": "NVDA",
    "market": "us"
