@@ -1,5 +1,5 @@
 {
- "asof": "2026-10-17 08:43 KST",
+ "asof": "2026-10-20 09:28 KST",
  "market_ok": false,
  "universe_count": 130,
  "scope": "S&P 500 + Nasdaq-100 유니버스 · 60거래일 이상",
@@ -17,7 +17,7 @@
    "range_contraction_pct": 28.5,
    "volume_dryup": true,
    "volume_dryup_ratio": 0.5,
-   "volume_vs_20d": 1.41,
+   "volume_vs_20d": 1.42,
    "ticker": "PLTR",
    "name": "PLTR",
    "market": "us"
@@ -71,7 +71,7 @@
    "range_contraction_pct": 78.4,
    "volume_dryup": true,
    "volume_dryup_ratio": 0.81,
-   "volume_vs_20d": 1.22,
+   "volume_vs_20d": 1.23,
    "ticker": "IBM",
    "name": "IBM",
    "market": "us"
@@ -143,7 +143,7 @@
    "range_contraction_pct": 62.6,
    "volume_dryup": true,
    "volume_dryup_ratio": 0.79,
-   "volume_vs_20d": 0.94,
+   "volume_vs_20d": 0.95,
    "ticker": "DIS",
    "name": "DIS",
    "market": "us"
@@ -179,7 +179,7 @@
    "range_contraction_pct": 77.0,
    "volume_dryup": true,
    "volume_dryup_ratio": 0.69,
-   "volume_vs_20d": 1.23,
+   "volume_vs_20d": 1.25,
    "ticker": "ISRG",
    "name": "ISRG",
    "market": "us"
@@ -215,7 +215,7 @@
    "range_contraction_pct": 37.5,
    "volume_dryup": true,
    "volume_dryup_ratio": 0.73,
-   "volume_vs_20d": 1.17,
+   "volume_vs_20d": 1.23,
    "ticker": "MO",
    "name": "MO",
    "market": "us"
@@ -250,8 +250,8 @@
    "distance_to_line_pct": -9.57,
    "range_contraction_pct": 34.1,
    "volume_dryup": true,
-   "volume_dryup_ratio": 0.71,
-   "volume_vs_20d": 1.13,
+   "volume_dryup_ratio": 0.72,
+   "volume_vs_20d": 1.17,
    "ticker": "ORCL",
    "name": "ORCL",
    "market": "us"
@@ -323,7 +323,7 @@
    "range_contraction_pct": 19.1,
    "volume_dryup": true,
    "volume_dryup_ratio": 0.82,
-   "volume_vs_20d": 1.33,
+   "volume_vs_20d": 1.35,
    "ticker": "MAR",
    "name": "MAR",
    "market": "us"
