@@ -1,5 +1,5 @@
 {
- "asof": "2026-10-21 08:59 KST",
+ "asof": "2026-10-22 09:03 KST",
  "market_ok": true,
  "universe_count": 130,
  "scope": "S&P 500 + Nasdaq-100 유니버스 · 60거래일 이상",
@@ -53,7 +53,7 @@
    "range_contraction_pct": 77.4,
    "volume_dryup": true,
    "volume_dryup_ratio": 0.74,
-   "volume_vs_20d": 0.74,
+   "volume_vs_20d": 0.75,
    "ticker": "HOOD",
    "name": "HOOD",
    "market": "us"
@@ -125,7 +125,7 @@
    "range_contraction_pct": 46.4,
    "volume_dryup": true,
    "volume_dryup_ratio": 0.67,
-   "volume_vs_20d": 1.14,
+   "volume_vs_20d": 1.18,
    "ticker": "SPOT",
    "name": "SPOT",
    "market": "us"
@@ -179,7 +179,7 @@
    "range_contraction_pct": 39.7,
    "volume_dryup": true,
    "volume_dryup_ratio": 0.77,
-   "volume_vs_20d": 0.91,
+   "volume_vs_20d": 0.92,
    "ticker": "SOFI",
    "name": "SOFI",
    "market": "us"
@@ -214,8 +214,8 @@
    "distance_to_line_pct": 4.05,
    "range_contraction_pct": 32.5,
    "volume_dryup": true,
-   "volume_dryup_ratio": 0.78,
-   "volume_vs_20d": 0.69,
+   "volume_dryup_ratio": 0.79,
+   "volume_vs_20d": 0.83,
    "ticker": "PYPL",
    "name": "PYPL",
    "market": "us"
@@ -232,8 +232,8 @@
    "distance_to_line_pct": 4.84,
    "range_contraction_pct": 47.6,
    "volume_dryup": true,
-   "volume_dryup_ratio": 0.78,
-   "volume_vs_20d": 1.61,
+   "volume_dryup_ratio": 0.79,
+   "volume_vs_20d": 1.76,
    "ticker": "ISRG",
    "name": "ISRG",
    "market": "us"
@@ -251,7 +251,7 @@
    "range_contraction_pct": 39.5,
    "volume_dryup": true,
    "volume_dryup_ratio": 0.68,
-   "volume_vs_20d": 0.51,
+   "volume_vs_20d": 0.53,
    "ticker": "ONON",
    "name": "ONON",
    "market": "us"
@@ -287,7 +287,7 @@
    "range_contraction_pct": 19.3,
    "volume_dryup": true,
    "volume_dryup_ratio": 0.77,
-   "volume_vs_20d": 1.33,
+   "volume_vs_20d": 1.44,
    "ticker": "TXN",
    "name": "TXN",
    "market": "us"
@@ -322,8 +322,8 @@
    "distance_to_line_pct": 7.14,
    "range_contraction_pct": 19.3,
    "volume_dryup": true,
-   "volume_dryup_ratio": 0.8,
-   "volume_vs_20d": 1.16,
+   "volume_dryup_ratio": 0.81,
+   "volume_vs_20d": 1.17,
    "ticker": "MAR",
    "name": "MAR",
    "market": "us"
