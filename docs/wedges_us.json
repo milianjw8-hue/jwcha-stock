@@ -1,5 +1,5 @@
 {
- "asof": "2026-10-24 08:53 KST",
+ "asof": "2026-10-27 09:37 KST",
  "market_ok": false,
  "universe_count": 130,
  "scope": "S&P 500 + Nasdaq-100 유니버스 · 60거래일 이상",
@@ -16,8 +16,8 @@
    "distance_to_line_pct": -1.21,
    "range_contraction_pct": 39.1,
    "volume_dryup": false,
-   "volume_dryup_ratio": 1.17,
-   "volume_vs_20d": 2.79,
+   "volume_dryup_ratio": 1.18,
+   "volume_vs_20d": 2.89,
    "ticker": "DECK",
    "name": "DECK",
    "market": "us"
@@ -107,7 +107,7 @@
    "range_contraction_pct": 67.5,
    "volume_dryup": true,
    "volume_dryup_ratio": 0.79,
-   "volume_vs_20d": 0.71,
+   "volume_vs_20d": 0.73,
    "ticker": "DAL",
    "name": "DAL",
    "market": "us"
@@ -143,7 +143,7 @@
    "range_contraction_pct": 36.4,
    "volume_dryup": true,
    "volume_dryup_ratio": 0.77,
-   "volume_vs_20d": 0.48,
+   "volume_vs_20d": 0.5,
    "ticker": "SHOP",
    "name": "SHOP",
    "market": "us"
@@ -161,7 +161,7 @@
    "range_contraction_pct": 61.9,
    "volume_dryup": true,
    "volume_dryup_ratio": 0.78,
-   "volume_vs_20d": 0.84,
+   "volume_vs_20d": 0.85,
    "ticker": "MO",
    "name": "MO",
    "market": "us"
@@ -233,7 +233,7 @@
    "range_contraction_pct": 37.5,
    "volume_dryup": true,
    "volume_dryup_ratio": 0.78,
-   "volume_vs_20d": 0.83,
+   "volume_vs_20d": 0.84,
    "ticker": "COIN",
    "name": "COIN",
    "market": "us"
@@ -250,8 +250,8 @@
    "distance_to_line_pct": 2.24,
    "range_contraction_pct": 41.6,
    "volume_dryup": true,
-   "volume_dryup_ratio": 0.79,
-   "volume_vs_20d": 0.65,
+   "volume_dryup_ratio": 0.8,
+   "volume_vs_20d": 0.75,
    "ticker": "AMGN",
    "name": "AMGN",
    "market": "us"
@@ -287,7 +287,7 @@
    "range_contraction_pct": 16.5,
    "volume_dryup": true,
    "volume_dryup_ratio": 0.47,
-   "volume_vs_20d": 0.72,
+   "volume_vs_20d": 0.79,
    "ticker": "PLTR",
    "name": "PLTR",
    "market": "us"
