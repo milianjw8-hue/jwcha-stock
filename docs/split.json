@@ -1,5 +1,5 @@
 {
- "asof": "2026-10-28 00:43 KST",
+ "asof": "2026-10-29 01:12 KST",
  "n_tranches": 6,
  "pyramid": [
   1.0,
@@ -13,12 +13,12 @@
   {
    "symbol": "VOO",
    "label": "VOO",
-   "close": 703.41,
-   "chg_pct": 0.69,
+   "close": 707.52,
+   "chg_pct": 0.58,
    "anchor": 716.2,
    "anchor_type": "high",
-   "ma20": 707.9075,
-   "ma200": 665.7359,
+   "ma20": 708.1605,
+   "ma200": 666.1094,
    "below_ma200": false,
    "gap_effective": 0.035,
    "up_day": true,
@@ -68,12 +68,12 @@
   {
    "symbol": "QQQ",
    "label": "QQQ",
-   "close": 712.2,
-   "chg_pct": 1.11,
+   "close": 721.25,
+   "chg_pct": 1.27,
    "anchor": 759.66,
    "anchor_type": "high",
-   "ma20": 734.0185,
-   "ma200": 676.5675,
+   "ma20": 733.1845,
+   "ma200": 677.0512,
    "below_ma200": false,
    "gap_effective": 0.05,
    "up_day": true,
@@ -123,15 +123,15 @@
   {
    "symbol": "SCHD",
    "label": "SCHD",
-   "close": 35.3,
-   "chg_pct": 0.09,
+   "close": 35.12,
+   "chg_pct": -0.51,
    "anchor": 35.4,
    "anchor_type": "high",
-   "ma20": 33.676,
-   "ma200": 31.7902,
+   "ma20": 33.7895,
+   "ma200": 31.8265,
    "below_ma200": false,
    "gap_effective": 0.028,
-   "up_day": true,
+   "up_day": false,
    "active_k": 0,
    "buy_signal": false,
    "target_pct": 0.035,
@@ -178,12 +178,12 @@
   {
    "symbol": "KRW=X",
    "label": "USD/KRW",
-   "close": 1330.98,
-   "chg_pct": 0.47,
-   "anchor": 1361.2274,
+   "close": 1333.1801,
+   "chg_pct": 0.48,
+   "anchor": 1361.3395,
    "anchor_type": "mean",
-   "ma20": 1336.8795,
-   "ma200": 1448.3549,
+   "ma20": 1335.488,
+   "ma200": 1447.6758,
    "below_ma200": true,
    "gap_effective": 0.018,
    "up_day": true,
@@ -194,37 +194,37 @@
    "levels": [
     {
      "k": 1,
-     "price": 1336.7254,
+     "price": 1336.8354,
      "reached": true,
      "weight": 1.0
     },
     {
      "k": 2,
-     "price": 1312.2233,
+     "price": 1312.3313,
      "reached": false,
      "weight": 1.1
     },
     {
      "k": 3,
-     "price": 1287.7212,
+     "price": 1287.8272,
      "reached": false,
      "weight": 1.2
     },
     {
      "k": 4,
-     "price": 1263.2191,
+     "price": 1263.3231,
      "reached": false,
      "weight": 1.3
     },
     {
      "k": 5,
-     "price": 1238.717,
+     "price": 1238.819,
      "reached": false,
      "weight": 1.45
     },
     {
      "k": 6,
-     "price": 1214.2149,
+     "price": 1214.3149,
      "reached": false,
      "weight": 1.6
     }
