@@ -1,5 +1,5 @@
 {
- "asof": "2026-10-29 01:12 KST",
+ "asof": "2026-10-30 01:20 KST",
  "n_tranches": 6,
  "pyramid": [
   1.0,
@@ -13,12 +13,12 @@
   {
    "symbol": "VOO",
    "label": "VOO",
-   "close": 707.52,
-   "chg_pct": 0.58,
+   "close": 709.9,
+   "chg_pct": 0.34,
    "anchor": 716.2,
    "anchor_type": "high",
-   "ma20": 708.1605,
-   "ma200": 666.1094,
+   "ma20": 708.6125,
+   "ma200": 666.4896,
    "below_ma200": false,
    "gap_effective": 0.035,
    "up_day": true,
@@ -68,24 +68,24 @@
   {
    "symbol": "QQQ",
    "label": "QQQ",
-   "close": 721.25,
-   "chg_pct": 1.27,
+   "close": 725.61,
+   "chg_pct": 0.6,
    "anchor": 759.66,
    "anchor_type": "high",
-   "ma20": 733.1845,
-   "ma200": 677.0512,
+   "ma20": 732.4765,
+   "ma200": 677.554,
    "below_ma200": false,
    "gap_effective": 0.05,
    "up_day": true,
-   "active_k": 1,
-   "buy_signal": true,
+   "active_k": 0,
+   "buy_signal": false,
    "target_pct": 0.065,
    "core_frac": 0.6,
    "levels": [
     {
      "k": 1,
      "price": 721.677,
-     "reached": true,
+     "reached": false,
      "weight": 1.0
     },
     {
@@ -123,12 +123,12 @@
   {
    "symbol": "SCHD",
    "label": "SCHD",
-   "close": 35.12,
-   "chg_pct": -0.51,
+   "close": 35.09,
+   "chg_pct": -0.09,
    "anchor": 35.4,
    "anchor_type": "high",
-   "ma20": 33.7895,
-   "ma200": 31.8265,
+   "ma20": 33.9175,
+   "ma200": 31.8628,
    "below_ma200": false,
    "gap_effective": 0.028,
    "up_day": false,
@@ -178,53 +178,53 @@
   {
    "symbol": "KRW=X",
    "label": "USD/KRW",
-   "close": 1333.1801,
-   "chg_pct": 0.48,
-   "anchor": 1361.3395,
+   "close": 1338.17,
+   "chg_pct": -0.16,
+   "anchor": 1361.4664,
    "anchor_type": "mean",
-   "ma20": 1335.488,
-   "ma200": 1447.6758,
+   "ma20": 1334.725,
+   "ma200": 1447.0861,
    "below_ma200": true,
    "gap_effective": 0.018,
-   "up_day": true,
-   "active_k": 1,
-   "buy_signal": true,
+   "up_day": false,
+   "active_k": 0,
+   "buy_signal": false,
    "target_pct": 0.015,
    "core_frac": 0.0,
    "levels": [
     {
      "k": 1,
-     "price": 1336.8354,
-     "reached": true,
+     "price": 1336.96,
+     "reached": false,
      "weight": 1.0
     },
     {
      "k": 2,
-     "price": 1312.3313,
+     "price": 1312.4536,
      "reached": false,
      "weight": 1.1
     },
     {
      "k": 3,
-     "price": 1287.8272,
+     "price": 1287.9472,
      "reached": false,
      "weight": 1.2
     },
     {
      "k": 4,
-     "price": 1263.3231,
+     "price": 1263.4408,
      "reached": false,
      "weight": 1.3
     },
     {
      "k": 5,
-     "price": 1238.819,
+     "price": 1238.9344,
      "reached": false,
      "weight": 1.45
     },
     {
      "k": 6,
-     "price": 1214.3149,
+     "price": 1214.428,
      "reached": false,
      "weight": 1.6
     }
