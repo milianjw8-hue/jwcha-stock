@@ -1,5 +1,5 @@
 {
- "asof": "2026-11-27 03:46 KST",
+ "asof": "2026-11-28 03:30 KST",
  "n_tranches": 6,
  "pyramid": [
   1.0,
@@ -13,17 +13,17 @@
   {
    "symbol": "VOO",
    "label": "VOO",
-   "close": 658.87,
-   "chg_pct": -0.28,
+   "close": 669.79,
+   "chg_pct": 1.66,
    "anchor": 716.2,
    "anchor_type": "high",
-   "ma20": 680.6315,
-   "ma200": 671.6223,
+   "ma20": 678.755,
+   "ma200": 671.8168,
    "below_ma200": true,
    "gap_effective": 0.0525,
-   "up_day": false,
+   "up_day": true,
    "active_k": 1,
-   "buy_signal": false,
+   "buy_signal": true,
    "target_pct": 0.045,
    "core_frac": 0.6,
    "levels": [
@@ -68,17 +68,17 @@
   {
    "symbol": "QQQ",
    "label": "QQQ",
-   "close": 633.93,
-   "chg_pct": -0.65,
+   "close": 650.99,
+   "chg_pct": 2.69,
    "anchor": 759.66,
    "anchor_type": "high",
-   "ma20": 666.7305,
-   "ma200": 682.5439,
+   "ma20": 663.513,
+   "ma200": 682.7437,
    "below_ma200": true,
    "gap_effective": 0.075,
-   "up_day": false,
-   "active_k": 2,
-   "buy_signal": false,
+   "up_day": true,
+   "active_k": 1,
+   "buy_signal": true,
    "target_pct": 0.065,
    "core_frac": 0.6,
    "levels": [
@@ -91,7 +91,7 @@
     {
      "k": 2,
      "price": 645.711,
-     "reached": true,
+     "reached": false,
      "weight": 1.1
     },
     {
@@ -123,12 +123,12 @@
   {
    "symbol": "SCHD",
    "label": "SCHD",
-   "close": 35.29,
-   "chg_pct": 1.15,
+   "close": 35.67,
+   "chg_pct": 1.08,
    "anchor": 36.21,
    "anchor_type": "high",
-   "ma20": 35.3885,
-   "ma200": 32.4962,
+   "ma20": 35.3915,
+   "ma200": 32.5202,
    "below_ma200": false,
    "gap_effective": 0.028,
    "up_day": true,
@@ -178,15 +178,15 @@
   {
    "symbol": "KRW=X",
    "label": "USD/KRW",
-   "close": 1341.12,
-   "chg_pct": -0.14,
-   "anchor": 1363.832,
+   "close": 1343.53,
+   "chg_pct": 0.04,
+   "anchor": 1363.8339,
    "anchor_type": "mean",
-   "ma20": 1340.366,
-   "ma200": 1436.5011,
+   "ma20": 1340.4865,
+   "ma200": 1436.5132,
    "below_ma200": true,
    "gap_effective": 0.018,
-   "up_day": false,
+   "up_day": true,
    "active_k": 0,
    "buy_signal": false,
    "target_pct": 0.015,
@@ -194,37 +194,37 @@
    "levels": [
     {
      "k": 1,
-     "price": 1339.283,
+     "price": 1339.2849,
      "reached": false,
      "weight": 1.0
     },
     {
      "k": 2,
-     "price": 1314.7341,
+     "price": 1314.7359,
      "reached": false,
      "weight": 1.1
     },
     {
      "k": 3,
-     "price": 1290.1851,
+     "price": 1290.1869,
      "reached": false,
      "weight": 1.2
     },
     {
      "k": 4,
-     "price": 1265.6361,
+     "price": 1265.6379,
      "reached": false,
      "weight": 1.3
     },
     {
      "k": 5,
-     "price": 1241.0871,
+     "price": 1241.0889,
      "reached": false,
      "weight": 1.45
     },
     {
      "k": 6,
-     "price": 1216.5382,
+     "price": 1216.5399,
      "reached": false,
      "weight": 1.6
     }
